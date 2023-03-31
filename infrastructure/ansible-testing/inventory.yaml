@@ -1,0 +1,4 @@
+soc:
+  hosts:
+    soccy:
+      ansible_host: 68.183.112.113
