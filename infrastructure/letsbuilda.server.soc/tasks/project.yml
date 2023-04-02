@@ -1,0 +1,12 @@
+---
+# tasks for project.yml
+
+- name: "Clone {{ project.name }} github repo"
+  git:
+    repo: "{{ project.repo }}"
+    dest: "{{ project.dest }}"
+
+- name: Install requirements
+  pip:
+    requirements: "{{ project.dest }}/requirements.txt"
+    virtualenv: "{{ project.dest }}/venv"

@@ -1,0 +1,16 @@
+---
+# tasks file for letsbuilda.server.soc
+
+- name: Install system packages
+  apt:
+    name: "{{ package }}"
+    state: latest
+  loop: "{{ sys_packages }}"
+  loop_control:
+    loop_var: package
+
+- name: "Install {{ project.name }}"
+  include_tasks: project.yml
+  loop: "{{ projects }}"
+  loop_control:
+    loop_var: project

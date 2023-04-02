@@ -1,0 +1,37 @@
+---
+- hosts: localhost
+  vars_files:
+    - vars/bootstrap.yml
+
+  tasks:
+    - name: Create a droplet
+      community.digitalocean.digital_ocean_droplet:
+        state: present
+        oauth_token: "{{ do_api_token }}"
+        name: "{{ droplet_name }}"
+        size: s-1vcpu-512mb-10gb
+        region: nyc1
+        image: ubuntu-22-04-x64
+        ipv6: true
+        firewall: [ "SOCwall" ]
+        ssh_keys: [ "63:dd:ac:4f:df:08:cd:6d:57:d9:5a:92:79:a7:ba:0d" ]
+      delegate_to: localhost
+    - name: Wait for droplet to become available
+      community.digitalocean.digital_ocean_droplet_info:
+        oauth_token: "{{ do_api_token }}"
+        name: "{{ droplet_name }}"
+      register: droplet_data
+      delegate_to: localhost
+    - name: Set ip address
+      set_fact:
+        droplet_ip_address: "{{ droplet_data[0].networks.v4[0].ip_address }}"
+    - name: Wait for droplet to become up
+      wait_for:
+        host: "{{ droplet_ip_address }}"
+        port: 22
+        delay: 60
+
+    - name: Bootstrap the droplet
+      include_role:
+        name: letsbuilda.server.bootstrap
+      delegate_to: "{{ droplet_ip_address }}"
