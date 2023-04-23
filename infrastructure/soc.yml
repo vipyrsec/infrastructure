@@ -1,8 +1,0 @@
----
-- hosts: socvpc1
-  become: yes
-
-  tasks:
-    - name: Include the soc role
-      include_role:
-        - name: letsbuilda.server.soc
