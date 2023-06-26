@@ -1,0 +1,7 @@
+services:
+  bot:
+    image: 'ghcr.io/vipyrsec/bot:edge'
+    pull_policy: 'always'
+    restart: 'always'
+    env_file:
+      - '/opt/vipyrsec/dragonfly/bot-env.list'
