@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: dragonfly
+  name: mainframe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mainframe
+  template:
+    metadata:
+      labels:
+        app: mainframe
+    spec:
+      containers:
+        - name: mainframe
+          image: ghcr.io/vipyrsec/dragonfly-mainframe:edge
+          envFrom:
+            - secretRef:
+                name: dragonfly-mainframe-secrets
+      imagePullSecrets:
+        - name: dockerconfigjson-github
