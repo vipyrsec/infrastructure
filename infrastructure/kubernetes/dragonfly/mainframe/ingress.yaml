@@ -4,9 +4,9 @@ metadata:
   namespace: dragonfly
   name: dragonfly-ingress
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt"
 spec:
+  ingressClassName: nginx
   tls:
     - hosts:
         - dragonfly-staging.vipyrsec.com
