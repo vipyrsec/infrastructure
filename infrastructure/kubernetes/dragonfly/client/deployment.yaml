@@ -20,4 +20,4 @@ spec:
             - secretRef:
                 name: dragonfly-client-secrets
       imagePullSecrets:
-        - name: dockerconfigjson-github
+        - name: ghcr-images
