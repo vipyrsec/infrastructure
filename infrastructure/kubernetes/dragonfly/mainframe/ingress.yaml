@@ -9,10 +9,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - dragonfly.vipyrsec.com
+        - dragonfly-staging.vipyrsec.com
       secretName: dragonfly-tls
   rules:
-    - host: dragonfly.vipyrsec.com
+    - host: dragonfly-staging.vipyrsec.com
       http:
         paths:
           - path: /
