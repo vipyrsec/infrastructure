@@ -1,0 +1,5 @@
+ingress-nginx: 
+  namespace: "ingress-nginx"
+cert-manager: 
+  namespace: "cert-manager"
+  installCRDs: true
