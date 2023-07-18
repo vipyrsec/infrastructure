@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-potential_manifests = Path(".").glob("**/*.yaml")
+potential_manifests = Path("./kubernetes/manifests/").glob("**/*.yaml")
 
 likely_manifests = []
 
