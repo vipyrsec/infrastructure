@@ -1,4 +1,5 @@
 #!/bin/bash
+# Script to bootstrap a new VPS with the necessary users and groups
 
 groupadd vipyrsec
 

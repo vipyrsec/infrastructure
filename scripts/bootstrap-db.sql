@@ -1,3 +1,5 @@
+-- Script to bootstrap the database with necessary roles and users
+
 -- Dragonfly
 -- Create the database
 CREATE DATABASE dragonfly OWNER dragonfly;
