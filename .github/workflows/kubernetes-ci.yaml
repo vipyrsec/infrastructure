@@ -23,6 +23,6 @@ jobs:
           python scripts/find_manifests.py >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
         
-      - uses: jb3/k8s-lint@v1
+      - uses: azure/k8s-lint@v1
         with:
           manifests: ${{ steps.manifest-files.outputs.manifests }}
