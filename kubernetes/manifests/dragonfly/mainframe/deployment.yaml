@@ -18,6 +18,6 @@ spec:
           image: ghcr.io/vipyrsec/dragonfly-mainframe:edge
           envFrom:
             - secretRef:
-                name: dragonfly-mainframe-secrets
+                name: dragonfly-mainframe-env
       imagePullSecrets:
         - name: ghcr-images
