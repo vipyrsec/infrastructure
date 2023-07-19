@@ -9,10 +9,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - dragonfly-staging.vipyrsec.com
+        - dragonfly.vipyrsec.com
       secretName: dragonfly-tls
   rules:
-    - host: dragonfly-staging.vipyrsec.com
+    - host: dragonfly.vipyrsec.com
       http:
         paths:
           - path: /
