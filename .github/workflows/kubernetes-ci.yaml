@@ -1,0 +1,28 @@
+name: "CI - Kubernetes"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint:
+    name: "Lint manifests"
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v3
+
+      - id: manifest-files 
+        name: "Find manifest files"
+        run: |
+          echo "manifests<<EOF" >> $GITHUB_OUTPUT
+          python scripts/find_manifests.py >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        
+      - uses: azure/k8s-lint@v2.0
+        with:
+          manifests: ${{ steps.manifest-files.outputs.manifests }}

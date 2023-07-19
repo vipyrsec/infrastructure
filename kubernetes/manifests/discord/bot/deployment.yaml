@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: discord
+  name: bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bot
+  template:
+    metadata:
+      labels:
+        app: bot
+    spec:
+      containers:
+        - name: bot
+          image: ghcr.io/vipyrsec/bot:edge
+          envFrom:
+            - secretRef:
+                name: bot-env
+      imagePullSecrets:
+        - name: ghcr-images

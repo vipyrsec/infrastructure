@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: dragonfly
+  name: client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      containers:
+        - name: client
+          image: ghcr.io/vipyrsec/dragonfly-client-rs:rewrite
+          envFrom:
+            - secretRef:
+                name: dragonfly-client-env
+      imagePullSecrets:
+        - name: ghcr-images

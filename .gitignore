@@ -1,0 +1,5 @@
+# Secrets
+secrets.yaml
+
+# Helm
+kubernetes/chart/charts/*.tgz
