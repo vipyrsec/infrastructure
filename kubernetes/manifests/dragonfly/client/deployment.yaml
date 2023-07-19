@@ -18,6 +18,6 @@ spec:
           image: ghcr.io/vipyrsec/dragonfly-client-rs:rewrite
           envFrom:
             - secretRef:
-                name: dragonfly-client-secrets
+                name: dragonfly-client-env
       imagePullSecrets:
         - name: ghcr-images
