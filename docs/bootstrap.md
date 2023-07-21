@@ -19,7 +19,7 @@ helm install -f kubernetes\chart\production.yaml vipyrsec kubernetes\chart\
 Repeat this for both the Discord and the Dragonfly namespaces:
 
 ```bash
-kubectl create secret docker-registry regcred --docker-server=https://ghcr.io --docker-username=shenanigansd --docker-password=ghp_xxx --docker-email=bradley.reynolds@darbia.dev
+kubectl create secret docker-registry ghcr-images --docker-server=https://ghcr.io --docker-username=shenanigansd --docker-password=ghp_xxx --docker-email=bradley.reynolds@darbia.dev
 ```
 
 ## Apply the Discord bot deployment
