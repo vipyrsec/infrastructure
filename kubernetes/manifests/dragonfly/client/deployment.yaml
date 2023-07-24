@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: client
-          image: ghcr.io/vipyrsec/dragonfly-client-rs:rewrite
+          image: ghcr.io/vipyrsec/dragonfly-client-rs:main
           imagePullPolicy: Always
           envFrom:
             - secretRef:
