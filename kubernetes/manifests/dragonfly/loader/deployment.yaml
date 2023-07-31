@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   namespace: dragonfly
-  name: dragonfly-cronjob 
+  name: dragonfly-loader
 spec:
   schedule: "* * * * *"
   jobTemplate:
@@ -10,9 +10,9 @@ spec:
       template:
         spec:
           containers:
-          - name: dragonfly-cronjob
-            image: ghcr.io/vipyrsec/dragonfly-functions:edge
+          - name: dragonfly-loader
+            image: ghcr.io/vipyrsec/dragonfly-loader:edge
             imagePullPolicy: IfNotPresent
             envFrom:
               - secretRef:
-                  name: dragonfly-cronjob-env
+                  name: dragonfly-loader-env

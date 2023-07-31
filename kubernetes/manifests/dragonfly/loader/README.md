@@ -1,9 +1,9 @@
-# Dragonfly Cronjob 
+# Dragonfly Loader
 
-Infra configuration for the [Dragonfly Functions](https://github.com/vipyrsec/dragonfly-functions).
+Infra configuration for the [Dragonfly Loader](https://github.com/vipyrsec/dragonfly-loader).
 
 ## Secrets
-This deployment expects a number of secrets and environment variables to exist in a secret called `dragonfly-cronjob-env`.
+This deployment expects a number of secrets and environment variables to exist in a secret called `dragonfly-loader-env`.
 
 
 | Environment             | Description                                              |
