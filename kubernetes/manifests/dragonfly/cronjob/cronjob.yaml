@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  namespace: dragonfly
+  name: dragonfly-cronjob 
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: dragonfly-cronjob
+            image: ghcr.io/vipyrsec/dragonfly-functions:edge
+            imagePullPolicy: IfNotPresent
+            envFrom:
+              - secretRef:
+                  name: dragonfly-cronjob-env
