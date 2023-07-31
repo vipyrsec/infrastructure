@@ -16,3 +16,4 @@ spec:
             envFrom:
               - secretRef:
                   name: dragonfly-loader-env
+          restartPolicy: Never
