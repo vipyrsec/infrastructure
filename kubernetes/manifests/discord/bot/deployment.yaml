@@ -20,5 +20,3 @@ spec:
           envFrom:
             - secretRef:
                 name: bot-env
-      imagePullSecrets:
-        - name: ghcr-images

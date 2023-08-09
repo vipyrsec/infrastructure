@@ -20,5 +20,3 @@ spec:
           envFrom:
             - secretRef:
                 name: dragonfly-client-env
-      imagePullSecrets:
-        - name: ghcr-images
