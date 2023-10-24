@@ -10,3 +10,4 @@ This deployment expects a number of secrets and environment variables to exist i
 |-------------------------|------------------------------------|
 | KEYCLOAK_ADMIN          | Keycloak Admin Panel Username      |
 | KEYCLOAK_PASSWORD       | Keycloak Admin Panel Password      |
+| KC_DB_URL               | Keycloak Database Connection URL   |
