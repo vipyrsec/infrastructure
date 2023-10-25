@@ -29,3 +29,8 @@ updates:
     directory: "kubernetes/manifests/dragonfly/mainframe"
     schedule:
       interval: "monthly"
+
+  - package-ecosystem: "docker"
+    directory: "kubernetes/manifests/keycloak"
+    schedule:
+      interval: "monthly"
