@@ -1,28 +1,45 @@
-name: "CI - Kubernetes"
+---
+name: CI - Kubernetes
 
 on:
+  pull_request:
   push:
     branches:
       - main
-  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   lint:
-    name: "Lint manifests"
+    name: Lint manifests
 
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        kubernetes-version:
+          - '1.27'
 
+    runs-on: ubuntu-22.04
     steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
 
-      - id: manifest-files 
-        name: "Find manifest files"
-        run: |
-          echo "manifests<<EOF" >> $GITHUB_OUTPUT
-          python scripts/find_manifests.py >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-        
-      - uses: azure/k8s-lint@v2.0
+      - name: Set up Go
+        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe  # v4.1.0
         with:
-          manifests: ${{ steps.manifest-files.outputs.manifests }}
+          go-version: '1.21'
+
+      - name: Install `kubectl-validate`
+        run: go install -ldflags='-s -w' -race -trimpath sigs.k8s.io/kubectl-validate@latest
+
+      - name: Lint manifests
+        run: |-
+          kubectl-validate kubernetes/manifests/ \
+            --local-crds kubernetes/crds/ \
+            --version '${{ matrix.kubernetes-version }}'
