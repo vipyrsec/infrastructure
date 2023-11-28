@@ -3,3 +3,5 @@ creation_rules:
   - path_regex: secrets\.enc\.yaml$
     age: >-
       age14x4ptx2a6tmudhx4t89r9xzxjkqmcaf36q8rkvh9mqwetl0sc9sqrqqe6k
+    pgp: >-
+      57C08B3692574B9AC337B4C01266FEE4207113D2
