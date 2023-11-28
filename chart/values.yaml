@@ -1,0 +1,250 @@
+---
+# = Tags =========================================================================
+tags:
+  monitoring: true
+  logging: true
+
+# = Our chart values =============================================================
+x-image: &image
+  registry: ghcr.io
+  pullPolicy: Always
+
+discord:
+  bot:
+    image:
+      <<: *image
+      repository: vipyrsec/bot
+      tag: edge
+
+dragonfly:
+  host: dragonfly.vipyrsec.com
+
+  client:
+    image:
+      <<: *image
+      repository: vipyrsec/dragonfly-client-rs
+      tag: edge
+
+  loader:
+    image:
+      <<: *image
+      repository: vipyrsec/dragonfly-loader
+      tag: v1.0.1
+
+  mainframe:
+    image:
+      <<: *image
+      repository: vipyrsec/dragonfly-mainframe
+      tag: edge
+
+# = Subchart values ==============================================================
+x-monitoring-namespace: &monitoring-namespace monitoring
+
+ingress-nginx:
+  fullnameOverride: ingress-nginx
+
+  controller:
+    image:
+      tag: v1.9.4
+      pullPolicy: Always
+
+    admissionWebhooks:
+      image:
+        tag: v20231011-8b53cabe0
+        pullPolicy: Always
+
+cert-manager:
+  enabled: true
+  namespace: cert-manager
+
+  image:
+    tag: v1.13.1
+    pullPolicy: Always
+
+  installCRDs: true
+
+  prometheus:
+    servicemonitor:
+      enabled: true
+
+  webhook:
+    image:
+      tag: v1.13.1
+      pullPolicy: Always
+
+  cainjector:
+    image:
+      tag: v1.13.1
+      pullPolicy: Always
+
+  acmesolver:
+    image:
+      tag: v1.13.1
+      pullPolicy: Always
+
+  startupapicheck:
+    image:
+      tag: v1.13.1
+      pullPolicy: Always
+
+postgresql:
+  fullnameOverride: postgres
+
+  image:
+    tag: 16.0.0
+    pullPolicy: Always
+
+  metrics:
+    enabled: true
+
+    image:
+      tag: 0.14.0
+      pullPolicy: Always
+
+kube-prometheus-stack:
+  fullnameOverride: monitoring
+  namespaceOverride: *monitoring-namespace
+
+  defaultRules:
+    rules:
+      windows: false
+
+  prometheusOperator:
+    image:
+      tag: v0.68.0
+      pullPolicy: Always
+
+    admissionWebhooks:
+      patch:
+        image:
+          tag: v20221220-controller-v1.5.1-58-g787ea74b6
+          pullPolicy: Always
+
+    prometheusConfigReloader:
+      image:
+        tag: v0.68.0
+        pullPolicy: Always
+
+  prometheus:
+    image:
+      tag: v2.47.1
+
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - prometheus.vipyrsec.com
+
+  alertmanager:
+    alertmanagerSpec:
+      image:
+        tag: v0.26.0
+
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - alertmanager.vipyrsec.com
+
+  grafana:
+    fullnameOverride: grafana
+    namespaceOverride: *monitoring-namespace
+
+    defaultDashboardsTimezone: browser
+
+    additionalDataSources:
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        url: http://loki.vipyrsec.svc.cluster.local:3100
+
+        jsonData:
+          maxLines: 100
+
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - grafana.vipyrsec.com
+
+  kube-state-metrics:
+    enabled: true
+
+    fullnameOverride: kube-state-metrics
+    namespaceOverride: *monitoring-namespace
+
+    selfMonitor:
+      enabled: true
+
+  prometheus-node-exporter:
+    enabled: true
+
+    fullnameOverride: prometheus-node-exporter
+    namespaceOverride: *monitoring-namespace
+
+    hostRootFsMount:
+      enabled: false
+
+loki:
+  fullnameOverride: loki
+
+  loki:
+    image:
+      tag: 2.9.2
+      pullPolicy: Always
+
+    commonConfig:
+      replication_factor: 1
+
+    storage:
+      type: filesystem
+
+    auth_enabled: false
+
+  test:
+    image:
+      digest: sha256:4eca92e66d9367ba6f0920c6998d9955bb979346d69db315e32e77d6f1b47fe8
+      pullPolicy: Always
+
+  monitoring:
+    selfMonitoring:
+      enabled: true
+
+    lokiCanary:
+      image:
+        tag: 2.9.2
+        pullPolicy: Always
+
+  singleBinary:
+    replicas: 1
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - loki.vipyrsec.com
+
+  gateway:
+    enabled: false
+
+  sidecar:
+    image:
+      tag: 1.24.3
+      pullPolicy: Always
+
+promtail:
+  fullnameOverride: promtail
+
+  image:
+    tag: 2.9.2
+    pullPolicy: Always
+
+  serviceMonitor:
+    enabled: true
+
+  config:
+    enabled: true
+
+    clients:
+      - url: http://loki.vipyrsec.svc.cluster.local:3100/loki/api/v1/push

@@ -1,0 +1,4 @@
+{{- range $path, $_ := .Files.Glob "docs/**/README.md" -}}
+---
+{{   $.Files.Get $path -}}
+{{- end }}

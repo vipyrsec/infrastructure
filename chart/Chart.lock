@@ -1,0 +1,21 @@
+dependencies:
+- name: ingress-nginx
+  repository: https://kubernetes.github.io/ingress-nginx/
+  version: 4.8.3
+- name: cert-manager
+  repository: https://charts.jetstack.io
+  version: v1.13.2
+- name: postgresql
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 13.2.21
+- name: kube-prometheus-stack
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 54.2.2
+- name: loki
+  repository: https://grafana.github.io/helm-charts
+  version: 5.38.0
+- name: promtail
+  repository: https://grafana.github.io/helm-charts
+  version: 6.15.3
+digest: sha256:7e5b9cd7ae1656d48ea30abd211e64d08bed0b2d1cde61176d67075ae4ec1bdf
+generated: "2023-11-28T23:21:58.850474+05:30"

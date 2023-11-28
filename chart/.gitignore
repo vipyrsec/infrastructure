@@ -1,5 +1,12 @@
-# Created by https://www.toptal.com/developers/gitignore/api/linux,macos,windows,vim,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,windows,vim,visualstudiocode
+# User-defined
+local.*.yaml
+
+# Created by https://www.toptal.com/developers/gitignore/api/linux,macos,windows,vim,visualstudiocode,helm
+# Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,windows,vim,visualstudiocode,helm
+
+### Helm ###
+# Chart dependencies
+**/charts/*.tgz
 
 ### Linux ###
 *~
@@ -113,4 +120,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/linux,macos,windows,vim,visualstudiocode
+# End of https://www.toptal.com/developers/gitignore/api/linux,macos,windows,vim,visualstudiocode,helm

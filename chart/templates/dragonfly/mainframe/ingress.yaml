@@ -1,0 +1,34 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  namespace: dragonfly
+  name: dragonfly-ingress
+
+  {{- if index .Values "cert-manager" "enabled" }}
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+  {{- end }}
+
+spec:
+  ingressClassName: nginx
+
+  {{- if index .Values "cert-manager" "enabled" }}
+  tls:
+    - hosts:
+        - {{ .Values.dragonfly.host }}
+      secretName: dragonfly-tls
+  {{- end }}
+
+  rules:
+    - host: {{ .Values.dragonfly.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mainframe
+                port:
+                  number: 8000

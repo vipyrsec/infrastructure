@@ -1,0 +1,39 @@
+---
+apiVersion: v2
+name: vipyrsec
+description: Automates the installation and configuration of our dependencies.
+type: application
+version: 0.1.0
+appVersion: 0.1.0
+
+dependencies:
+  - name: ingress-nginx
+    version: 4.8.3
+    repository: https://kubernetes.github.io/ingress-nginx/
+
+  - name: cert-manager
+    version: v1.13.2
+    repository: https://charts.jetstack.io
+    condition: cert-manager.enabled
+
+  - name: postgresql
+    version: 13.2.21
+    repository: oci://registry-1.docker.io/bitnamicharts
+
+  - name: kube-prometheus-stack
+    version: 54.2.2
+    repository: https://prometheus-community.github.io/helm-charts
+    tags:
+      - monitoring
+
+  - name: loki
+    version: 5.38.0
+    repository: https://grafana.github.io/helm-charts
+    tags:
+      - logging
+
+  - name: promtail
+    version: 6.15.3
+    repository: https://grafana.github.io/helm-charts
+    tags:
+      - logging
