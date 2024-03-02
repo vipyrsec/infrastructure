@@ -12,6 +12,7 @@ rules:
   - secrets
   verbs:
   - list
+
 - apiGroups:
   - apps
   resources:
@@ -20,15 +21,30 @@ rules:
   - deployments
   verbs:
   - list
+
 - apiGroups:
   - batch
   resources:
   - jobs
   verbs:
   - list
+
 - apiGroups:
   - networking.k8s.io
   resources:
   - ingresses
   verbs:
   - list
+
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterroles
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
