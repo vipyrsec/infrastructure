@@ -7,3 +7,4 @@ metadata:
     app: keycloak
 data:
   KC_PROXY_HEADERS: "xforwarded"
+  KC_SPI_X509CERT_LOOKUP_NGINX_SSL_CLIENT_CERT: "SSL_CLIENT_CERT"
