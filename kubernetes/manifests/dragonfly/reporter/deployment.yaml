@@ -2,24 +2,24 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: dragonfly
-  name: mainframe
+  name: reporter
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mainframe
+      app: reporter
   template:
     metadata:
       labels:
-        app: mainframe
+        app: reporter
     spec:
       containers:
-        - name: mainframe
-          image: ghcr.io/vipyrsec/dragonfly-mainframe:edge
+        - name: reporter
+          image: ghcr.io/vipyrsec/dragonfly-reporter:edge
           imagePullPolicy: Always
           envFrom:
             - secretRef:
-                name: dragonfly-mainframe-env
+                name: dragonfly-reporter-env
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
