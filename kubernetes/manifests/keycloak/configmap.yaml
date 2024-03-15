@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-config
+  namespace: keycloak
+  labels:
+    app: keycloak
+data:
+  KC_PROXY_HEADERS: "xforwarded"
