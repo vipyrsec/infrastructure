@@ -6,26 +6,11 @@ updates:
       interval: "monthly"
 
   - package-ecosystem: "docker"
-    directory: "kubernetes/chart"
-    schedule:
-      interval: "monthly"
-
-  - package-ecosystem: "docker"
-    directory: "kubernetes/manifests/discord/bot"
-    schedule:
-      interval: "monthly"
-
-  - package-ecosystem: "docker"
-    directory: "kubernetes/manifests/dragonfly/client"
-    schedule:
-      interval: "monthly"
-
-  - package-ecosystem: "docker"
-    directory: "kubernetes/manifests/dragonfly/loader"
-    schedule:
-      interval: "monthly"
-
-  - package-ecosystem: "docker"
-    directory: "kubernetes/manifests/dragonfly/mainframe"
+    directories: 
+      - "kubernetes/chart"
+      - "kubernetes/manifests/discord/bot"
+      - "kubernetes/manifests/dragonfly/client"
+      - "kubernetes/manifests/dragonfly/loader"
+      - "kubernetes/manifests/dragonfly/mainframe"
     schedule:
       interval: "monthly"
