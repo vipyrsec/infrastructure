@@ -1,5 +1,13 @@
+# JetBrains
+.idea
+
 # Secrets
 secrets.yaml
 
 # Helm
 kubernetes/chart/charts/*.tgz
+
+# Certs created during user generation
+*.crt
+*.csr
+*.key
