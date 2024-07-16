@@ -6,9 +6,9 @@ You will need:
 
 * [`doctl`](https://docs.digitalocean.com/reference/doctl/how-to/install/) configured with a...
 * [Digital Ocean Personal Access Token](https://docs.digitalocean.com/reference/api/create-personal-access-token/) with at least the following scopes:
-  * kubernetes (2): create, delete
+  * kubernetes: create, delete
   * If replacing an existing cluster:
-    * load\_balancer (1): delete
+    * load\_balancer: read, delete
 * `PWD` set to the root of this repo
 * [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl)
 * [`helm`](https://helm.sh/docs/intro/install/)
