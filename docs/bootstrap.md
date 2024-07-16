@@ -33,7 +33,7 @@ created cluster.
 ## Apply `cert-manager` CRDs
 
 ```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.12.0/cert-manager.crds.yaml
+kubectl apply -f ./kubernetes/crds/cert-manager.crds.yaml
 ```
 
 ## Install the Helm Chart for `ingress-nginx` and `cert-manager`
