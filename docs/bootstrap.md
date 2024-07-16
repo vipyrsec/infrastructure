@@ -1,4 +1,4 @@
-# Bootstrapping Dragonfly on Digital Ocean
+# How to Bootstrap Dragonfly on Digital Ocean
 
 ## Prerequisites
 
