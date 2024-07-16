@@ -9,12 +9,12 @@ You will need:
   * kubernetes (2): create, delete
   * If replacing an existing cluster:
     * load\_balancer (1): delete
-* PWD set to the root of this repo
+* `PWD` set to the root of this repo
 * [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl)
 * [`helm`](https://helm.sh/docs/intro/install/)
 
 ## Create the cluster in Digital Ocean
-```
+```bash
 doctl k8s cluster create \
   <cluster-name> \
   --size s-2vcpu-2gb \
@@ -28,7 +28,7 @@ for more options.
 
 ## Apply `cert-manager` CRDs
 
-```
+```bash
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.12.0/cert-manager.crds.yaml
 ```
 
@@ -42,7 +42,7 @@ helm upgrade vipyrsec ./kubernetes/chart --install
 
 Secrets are not included in this repo; you will need to create your own.
 
-```
+```bash
 kubectl apply -f ./kubernetes/manifests -R
 ```
 
@@ -50,7 +50,7 @@ kubectl apply -f ./kubernetes/manifests -R
 
 ## If replacing an existing cluster, destroy old resources
 
-```
+```bash
 doctl k8s cluster delete <name>
 doctl compute load-balancer delete <id>
 ```
