@@ -22,9 +22,13 @@ doctl k8s cluster create \
   --region nyc3
 ```
 
-Adjust `size` and `count` as needed. See [`doctl kubernetes cluster create
+Adjust `size`, `count`, and `region` as needed. See [`doctl kubernetes cluster
+create
 docs`](https://docs.digitalocean.com/reference/doctl/reference/kubernetes/cluster/create/)
-for more options.
+for more options. The cluster may take a few minutes to provision.
+
+**Note**: `doctl k8s cluster create` sets the `kubectl` context to the newly
+created cluster.
 
 ## Apply `cert-manager` CRDs
 
