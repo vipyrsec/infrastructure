@@ -47,9 +47,9 @@ helm upgrade vipyrsec ./kubernetes/chart --install
 Secrets are not included in this repo; you will need to create your own.
 
 ```bash
-kubectl apply -f kubernetes\manifests\cert-manager\namespace.yaml
-kubectl apply -f kubernetes\manifests\discord\namespace.yaml
-kubectl apply -f kubernetes\manifests\dragonfly\namespace.yaml
+kubectl apply -f ./kubernetes/manifests/cert-manager/namespace.yaml
+kubectl apply -f ./kubernetes/manifests/discord/namespace.yaml
+kubectl apply -f ./kubernetes/manifests/dragonfly/namespace.yaml
 kubectl apply -f ./kubernetes/manifests -R
 ```
 
