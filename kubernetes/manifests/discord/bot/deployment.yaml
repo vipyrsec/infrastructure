@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: bot
-          image: ghcr.io/vipyrsec/bot:92e2b3332521860326c6dc6ca71f548fa0ce9fe2
+          image: ghcr.io/vipyrsec/bot:d4a84d6a4a792295048aadf57b48b3abe9aba953
           imagePullPolicy: Always
           envFrom:
             - secretRef:
