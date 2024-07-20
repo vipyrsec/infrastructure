@@ -1,0 +1,45 @@
+alloy:
+  configMap:
+    content: |-
+      // Set Alloy logging to INFO
+      logging {
+        level = "info"
+        format = "logfmt"
+      }
+
+      loki.write "local" {
+        endpoint {
+          url = "http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push"
+        }
+      }
+
+      discovery.kubernetes "pod" {
+        role = "pod"
+      }
+
+      discovery.relabel "pod_logs" {
+        targets = discovery.kubernetes.pod.targets
+
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          action = "replace"
+          target_label = "namespace"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          action = "replace"
+          target_label = "container"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+          action = "replace"
+          target_label = "app"
+        }
+      }
+
+      loki.source.kubernetes "pod_logs" {
+        targets = discovery.relabel.pod_logs.output
+        forward_to = [loki.write.local.receiver]
+      }
