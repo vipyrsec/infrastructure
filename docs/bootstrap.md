@@ -13,6 +13,17 @@ You will need:
 * [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl)
 * [`helm`](https://helm.sh/docs/intro/install/)
 
+## Get secrets
+
+Create Kubernetes Secrets in the `./kubernetes/manifests` directory.
+
+See the following list for secrets to create:
+
+* [Bot](https://github.com/vipyrsec/bot/blob/main/README.md)
+* [Mainframe](https://github.com/vipyrsec/dragonfly-mainframe/README.md)
+* [Loader](https://github.com/vipyrsec/dragonfly-loader/README.md)
+* [Client](https://github.com/vipyrsec/dragonfly-client-rs/README.md)
+
 ## Create the cluster in Digital Ocean
 ```bash
 doctl k8s cluster create \
@@ -43,8 +54,6 @@ helm upgrade vipyrsec ./kubernetes/chart --install
 ```
 
 ## Apply manifests and secrets
-
-Secrets are not included in this repo; you will need to create your own.
 
 ```bash
 kubectl apply -f ./kubernetes/manifests/cert-manager/namespace.yaml
