@@ -3,3 +3,6 @@ secrets.yaml
 
 # Helm
 kubernetes/chart/charts/*.tgz
+
+# Pre-commit > Prettier
+.prettier-cache
