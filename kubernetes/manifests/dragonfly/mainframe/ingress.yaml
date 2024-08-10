@@ -1,10 +1,13 @@
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
+
 metadata:
   namespace: dragonfly
   name: dragonfly-ingress
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: letsencrypt
+
 spec:
   ingressClassName: nginx
   tls:

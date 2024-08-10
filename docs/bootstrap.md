@@ -4,14 +4,15 @@
 
 You will need:
 
-* [`doctl`](https://docs.digitalocean.com/reference/doctl/how-to/install/) configured with a...
-* [Digital Ocean Personal Access Token](https://docs.digitalocean.com/reference/api/create-personal-access-token/) with at least the following scopes:
-  * kubernetes: create, delete
-  * If replacing an existing cluster:
-    * load\_balancer: read, delete
-* `PWD` set to the root of this repo
-* [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl)
-* [`helm`](https://helm.sh/docs/intro/install/)
+- [`doctl`](https://docs.digitalocean.com/reference/doctl/how-to/install/) configured with a...
+- [Digital Ocean Personal Access Token](https://docs.digitalocean.com/reference/api/create-personal-access-token/) with
+  at least the following scopes:
+  - kubernetes: create, delete
+  - If replacing an existing cluster:
+    - load_balancer: read, delete
+- `PWD` set to the root of this repo
+- [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl)
+- [`helm`](https://helm.sh/docs/intro/install/)
 
 ## Get secrets
 
@@ -19,12 +20,13 @@ Create Kubernetes Secrets in the `./kubernetes/manifests` directory.
 
 See the following list for secrets to create:
 
-* [Bot](https://github.com/vipyrsec/bot/blob/main/README.md)
-* [Mainframe](https://github.com/vipyrsec/dragonfly-mainframe/README.md)
-* [Loader](https://github.com/vipyrsec/dragonfly-loader/README.md)
-* [Client](https://github.com/vipyrsec/dragonfly-client-rs/README.md)
+- [Bot](https://github.com/vipyrsec/bot/blob/main/README.md)
+- [Mainframe](https://github.com/vipyrsec/dragonfly-mainframe/README.md)
+- [Loader](https://github.com/vipyrsec/dragonfly-loader/README.md)
+- [Client](https://github.com/vipyrsec/dragonfly-client-rs/README.md)
 
 ## Create the cluster in Digital Ocean
+
 ```bash
 doctl k8s cluster create \
   <cluster-name> \
@@ -33,13 +35,11 @@ doctl k8s cluster create \
   --region nyc3
 ```
 
-Adjust `size`, `count`, and `region` as needed. See [`doctl kubernetes cluster
-create
-docs`](https://docs.digitalocean.com/reference/doctl/reference/kubernetes/cluster/create/)
+Adjust `size`, `count`, and `region` as needed. See
+[`doctl kubernetes cluster create docs`](https://docs.digitalocean.com/reference/doctl/reference/kubernetes/cluster/create/)
 for more options. The cluster may take a few minutes to provision.
 
-**Note**: `doctl k8s cluster create` sets the `kubectl` context to the newly
-created cluster.
+**Note**: `doctl k8s cluster create` sets the `kubectl` context to the newly created cluster.
 
 ## Apply `cert-manager` CRDs
 
