@@ -1,16 +1,18 @@
+---
 version: 2
-updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "monthly"
 
-  - package-ecosystem: "docker"
-    directories: 
-      - "kubernetes/chart"
-      - "kubernetes/manifests/discord/bot"
-      - "kubernetes/manifests/dragonfly/client"
-      - "kubernetes/manifests/dragonfly/loader"
-      - "kubernetes/manifests/dragonfly/mainframe"
+updates:
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "monthly"
+      interval: monthly
+
+  - package-ecosystem: docker
+    directories:
+      - kubernetes/chart
+      - kubernetes/manifests/discord/bot
+      - kubernetes/manifests/dragonfly/client
+      - kubernetes/manifests/dragonfly/loader
+      - kubernetes/manifests/dragonfly/mainframe
+    schedule:
+      interval: monthly
