@@ -10,9 +10,13 @@ updates:
   - package-ecosystem: docker
     directories:
       - kubernetes/chart
+      - kubernetes/manifests/cert-manager
+      - kubernetes/manifests/discord
       - kubernetes/manifests/discord/bot
+      - kubernetes/manifests/dragonfly
       - kubernetes/manifests/dragonfly/client
       - kubernetes/manifests/dragonfly/loader
       - kubernetes/manifests/dragonfly/mainframe
+      - kubernetes/manifests/dragonfly/reporter
     schedule:
       interval: monthly
