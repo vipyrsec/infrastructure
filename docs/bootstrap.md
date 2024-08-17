@@ -1,35 +1,72 @@
-# Bootstrapping a Kubernetes cluster
+# How to Bootstrap Dragonfly on Digital Ocean
 
-## Create namespaces
+## Prerequisites
+
+You will need:
+
+- [`doctl`](https://docs.digitalocean.com/reference/doctl/how-to/install/) configured with a...
+- [Digital Ocean Personal Access Token](https://docs.digitalocean.com/reference/api/create-personal-access-token/) with
+  at least the following scopes:
+  - kubernetes: create, delete
+  - If replacing an existing cluster:
+    - load_balancer: read, delete
+- `PWD` set to the root of this repo
+- [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl)
+- [`helm`](https://helm.sh/docs/intro/install/)
+
+## Get secrets
+
+Create Kubernetes Secrets in the `./kubernetes/manifests` directory.
+
+See the following list for secrets to create:
+
+- [Bot](https://github.com/vipyrsec/bot/blob/main/README.md)
+- [Mainframe](https://github.com/vipyrsec/dragonfly-mainframe/README.md)
+- [Loader](https://github.com/vipyrsec/dragonfly-loader/README.md)
+- [Client](https://github.com/vipyrsec/dragonfly-client-rs/README.md)
+
+## Create the cluster in Digital Ocean
 
 ```bash
-kubectl apply -f kubernetes\manifests\cert-manager\namespace.yaml
-kubectl apply -f kubernetes\manifests\discord\namespace.yaml
-kubectl apply -f kubernetes\manifests\dragonfly\namespace.yaml
+doctl k8s cluster create \
+  <cluster-name> \
+  --size s-2vcpu-2gb \
+  --count 2 \
+  --region nyc3
 ```
 
-## Install the Helm Chart to get all the dependencies
+Adjust `size`, `count`, and `region` as needed. See
+[`doctl kubernetes cluster create docs`](https://docs.digitalocean.com/reference/doctl/reference/kubernetes/cluster/create/)
+for more options. The cluster may take a few minutes to provision.
+
+**Note**: `doctl k8s cluster create` sets the `kubectl` context to the newly created cluster.
+
+## Apply `cert-manager` CRDs
 
 ```bash
-helm install -f kubernetes\chart\production.yaml vipyrsec kubernetes\chart\
+kubectl apply -f ./kubernetes/crds/cert-manager.crds.yaml
 ```
 
-## Apply the Discord bot deployment
+## Install the Helm Chart for `ingress-nginx` and `cert-manager`
 
 ```bash
-kubectl apply -f kubernetes\manifests\discord\bot
+helm upgrade vipyrsec ./kubernetes/chart --install
 ```
 
-## Apply the Dragonfly Mainframe deployment
+## Apply manifests and secrets
 
 ```bash
-kubectl apply -f kubernetes\manifests\dragonfly\client
+kubectl apply -f ./kubernetes/manifests/cert-manager/namespace.yaml
+kubectl apply -f ./kubernetes/manifests/discord/namespace.yaml
+kubectl apply -f ./kubernetes/manifests/dragonfly/namespace.yaml
+kubectl apply -f ./kubernetes/manifests -R
 ```
 
-After the mainframe ingress is created, you will need create the DNS records before deploying the client.
+## If access over the internet is required, create a DNS A Record to use the new load balancer
 
-## Apply the Dragonfly client deployment
+## If replacing an existing cluster, destroy old resources
 
 ```bash
-kubectl apply -f kubernetes\manifests\dragonfly\mainframe
+doctl k8s cluster delete <name>
+doctl compute load-balancer delete <id>
 ```

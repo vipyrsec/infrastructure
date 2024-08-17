@@ -1,8 +1,11 @@
+---
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   namespace: dragonfly
   name: reporter
+
 spec:
   replicas: 1
   selector:
@@ -15,8 +18,8 @@ spec:
     spec:
       containers:
         - name: reporter
-          image: ghcr.io/vipyrsec/dragonfly-reporter:edge
-          imagePullPolicy: Always
+          image: ghcr.io/vipyrsec/dragonfly-reporter:bb1f612c75ce88b635f6e58b1614edfb8a486ce7
+          imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
                 name: dragonfly-reporter-env

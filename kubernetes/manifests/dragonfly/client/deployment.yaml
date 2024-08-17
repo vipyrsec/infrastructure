@@ -1,8 +1,11 @@
+---
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   namespace: dragonfly
   name: client
+
 spec:
   replicas: 1
   selector:
@@ -15,8 +18,8 @@ spec:
     spec:
       containers:
         - name: client
-          image: ghcr.io/vipyrsec/dragonfly-client-rs:edge
-          imagePullPolicy: Always
+          image: ghcr.io/vipyrsec/dragonfly-client-rs:sha-61719d272569779d50cd3165fb4adaafd6cd4957
+          imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
                 name: dragonfly-client-env

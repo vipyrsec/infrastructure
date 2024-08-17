@@ -1,8 +1,11 @@
+---
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   namespace: dragonfly
   name: mainframe
+
 spec:
   replicas: 1
   selector:
@@ -15,8 +18,8 @@ spec:
     spec:
       containers:
         - name: mainframe
-          image: ghcr.io/vipyrsec/dragonfly-mainframe:edge
-          imagePullPolicy: Always
+          image: ghcr.io/vipyrsec/dragonfly-mainframe:b6a1b3ea9168c9b464735beb463c092aecd96b0d
+          imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
                 name: dragonfly-mainframe-env

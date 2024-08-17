@@ -1,8 +1,11 @@
+---
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   namespace: discord
   name: bot
+
 spec:
   replicas: 1
   selector:
@@ -15,8 +18,8 @@ spec:
     spec:
       containers:
         - name: bot
-          image: ghcr.io/vipyrsec/bot:edge
-          imagePullPolicy: Always
+          image: ghcr.io/vipyrsec/bot:78015a37fe80bdfc5690019a8d1c9124cc6b12b8
+          imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
                 name: bot-env
