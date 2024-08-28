@@ -120,6 +120,28 @@ alloy:
         	forward_to = [prometheus.remote_write.o11y.receiver]
         }
 
+        prometheus.relabel "tagged_staging" {
+        	rule {
+        		source_labels = ["__address__"]
+        		regex         = ".*"
+        		replacement   = "staging"
+        		target_label  = "cluster"
+        	}
+
+        	forward_to = [prometheus.remote_write.o11y.receiver]
+        }
+
+        prometheus.relabel "tagged_prod" {
+        	rule {
+        		source_labels = ["__address__"]
+        		regex         = ".*"
+        		replacement   = "prod"
+        		target_label  = "cluster"
+        	}
+
+        	forward_to = [prometheus.remote_write.o11y.receiver]
+        }
+
         prometheus.remote_write "o11y" {
         	endpoint {
         		url = "http://prometheus.prometheus.svc.cluster.local:9090/api/v1/write"
