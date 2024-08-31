@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: client
-          image: ghcr.io/vipyrsec/dragonfly-client-rs:sha-1b7d26bba796d8b07ba580ce942b70ee266e1e34
+          image: ghcr.io/vipyrsec/dragonfly-client-rs:sha-a2a30cf3f79c554f50c7e11e541b127a42e24e79
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
