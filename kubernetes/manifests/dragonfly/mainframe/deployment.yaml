@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: mainframe
-          image: ghcr.io/vipyrsec/dragonfly-mainframe:b6a1b3ea9168c9b464735beb463c092aecd96b0d
+          image: ghcr.io/vipyrsec/dragonfly-mainframe:9d7e2a1acc8dca2b0f6a14471a45e517d31dc7f8
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
