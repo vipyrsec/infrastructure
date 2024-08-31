@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: client
-          image: ghcr.io/vipyrsec/dragonfly-client-rs:sha-61719d272569779d50cd3165fb4adaafd6cd4957
+          image: ghcr.io/vipyrsec/dragonfly-client-rs:sha-1b7d26bba796d8b07ba580ce942b70ee266e1e34
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
@@ -32,3 +32,9 @@ spec:
             runAsUser: 10000
             runAsGroup: 10000
             readOnlyRootFilesystem: true
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-volume
+      volumes:
+        - name: tmp-volume
+          emptyDir:
