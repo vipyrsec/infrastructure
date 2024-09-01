@@ -7,14 +7,13 @@ metadata:
 
 spec:
   acme:
-    email: siddhesh.mhadnak@outlook.com
+    email: support@vipyrsec.com
     server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt-issuer-account-key
     solvers:
       - dns01:
           cloudflare:
-            email: siddhesh.mhadnak@outlook.com
             apiTokenSecretRef:
               name: cloudflare
               key: token
