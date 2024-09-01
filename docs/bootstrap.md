@@ -10,6 +10,7 @@ You will need:
   - kubernetes: create, delete
   - If replacing an existing cluster:
     - load_balancer: read, delete
+    - database: read, update
 - `PWD` set to the root of this repo
 - [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl)
 - [`helm`](https://helm.sh/docs/intro/install/)
@@ -40,6 +41,20 @@ Adjust `size`, `count`, and `region` as needed. See
 for more options. The cluster may take a few minutes to provision.
 
 **Note**: `doctl k8s cluster create` sets the `kubectl` context to the newly created cluster.
+
+## Add the cluster to the database whitelist
+
+I recommend using the DO Control Panel, but it is possible via the CLI as well.
+
+### With CLI
+
+```bash
+databasename=<database-name>
+clustername=<cluster-name>
+
+doctl databases firewalls append $(doctl databases list -o json | jq ".[] | select(.name == \"$databasename\") | .id" -r) \
+  --rule k8s:$(doctl k8s cluster get $clustername --format ID --no-header)
+```
 
 ## Apply `cert-manager` CRDs
 
