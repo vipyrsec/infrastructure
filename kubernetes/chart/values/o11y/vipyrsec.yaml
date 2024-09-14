@@ -1,0 +1,149 @@
+---
+ingress-nginx:
+  controller:
+    service:
+      type: NodePort
+      nodePorts:
+        http: 30080
+        https: 30443
+
+loki:
+  enabled: true
+
+  # annotations:
+  #   cert-manager.io/cluster-issuer: letsencrypt
+
+  # ingress:
+  #   tls:
+  #     - hosts:
+  #         - loki.vipyrsec.com
+  #       secretName: loki-tls
+
+alloy:
+  enabled: true
+
+  alloy:
+    configMap:
+      content: |-
+        logging {
+        	level  = "info"
+        	format = "logfmt"
+        }
+
+        discovery.kubernetes "pods" {
+        	role = "pod"
+        }
+
+        discovery.relabel "pods" {
+        	targets = discovery.kubernetes.pods.targets
+
+        	rule {
+        		source_labels = ["__meta_kubernetes_namespace"]
+        		action        = "replace"
+        		target_label  = "namespace"
+        	}
+
+        	rule {
+        		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+        		action        = "replace"
+        		target_label  = "app"
+        	}
+
+        	rule {
+        		source_labels = ["__meta_kubernetes_pod_name"]
+        		action        = "replace"
+        		target_label  = "pod"
+        	}
+
+        	rule {
+        		source_labels = ["__meta_kubernetes_pod_container_name"]
+        		action        = "replace"
+        		target_label  = "container"
+        	}
+        }
+
+        loki.source.kubernetes "pod_logs" {
+        	targets    = discovery.relabel.pods.output
+        	forward_to = [loki.process.pod_logs.receiver]
+        }
+
+        loki.process "pod_logs" {
+        	stage.static_labels {
+        		values = {
+        			cluster = "o11y",
+        		}
+        	}
+
+        	forward_to = [loki.write.o11y.receiver]
+        }
+
+        loki.write "o11y" {
+        	endpoint {
+        		url = "http://vipyrsec-loki.default.svc.cluster.local:3100/loki/api/v1/push"
+        	}
+        }
+
+        prometheus.exporter.self "local" { }
+
+        prometheus.exporter.unix "local" { }
+
+        prometheus.exporter.cadvisor "local" { }
+
+        prometheus.scrape "self" {
+        	targets    = prometheus.exporter.self.local.targets
+        	forward_to = [prometheus.relabel.tagged.receiver]
+        }
+
+        prometheus.scrape "node" {
+        	targets    = prometheus.exporter.unix.local.targets
+        	forward_to = [prometheus.relabel.tagged.receiver]
+        }
+
+        prometheus.scrape "cadvisor" {
+        	targets    = prometheus.exporter.cadvisor.local.targets
+        	forward_to = [prometheus.relabel.tagged.receiver]
+        }
+
+        prometheus.scrape "pods" {
+        	targets    = discovery.relabel.pods.output
+        	forward_to = [prometheus.relabel.tagged.receiver]
+        }
+
+        prometheus.relabel "tagged" {
+        	rule {
+        		source_labels = ["__address__"]
+        		regex         = ".*"
+        		replacement   = "o11y"
+        		target_label  = "cluster"
+        	}
+
+        	forward_to = [prometheus.remote_write.o11y.receiver]
+        }
+
+        prometheus.relabel "tagged_staging" {
+        	rule {
+        		source_labels = ["__address__"]
+        		regex         = ".*"
+        		replacement   = "staging"
+        		target_label  = "cluster"
+        	}
+
+        	forward_to = [prometheus.remote_write.o11y.receiver]
+        }
+
+        prometheus.relabel "tagged_prod" {
+        	rule {
+        		source_labels = ["__address__"]
+        		regex         = ".*"
+        		replacement   = "prod"
+        		target_label  = "cluster"
+        	}
+
+        	forward_to = [prometheus.remote_write.o11y.receiver]
+        }
+
+        prometheus.remote_write "o11y" {
+        	endpoint {
+        		url = "http://prometheus.prometheus.svc.cluster.local:9090/api/v1/write"
+        	}
+        }

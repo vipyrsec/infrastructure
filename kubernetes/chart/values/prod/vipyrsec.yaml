@@ -1,0 +1,131 @@
+---
+alloy:
+  enabled: true
+
+  alloy:
+    configMap:
+      content: |-
+        logging {
+        	level  = "info"
+        	format = "logfmt"
+        }
+
+        discovery.kubernetes "pods" {
+        	role = "pod"
+        }
+
+        discovery.relabel "pods" {
+        	targets = discovery.kubernetes.pods.targets
+
+        	rule {
+        		source_labels = ["__meta_kubernetes_namespace"]
+        		action        = "replace"
+        		target_label  = "namespace"
+        	}
+
+        	rule {
+        		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+        		action        = "replace"
+        		target_label  = "app"
+        	}
+
+        	rule {
+        		source_labels = ["__meta_kubernetes_pod_name"]
+        		action        = "replace"
+        		target_label  = "pod"
+        	}
+
+        	rule {
+        		source_labels = ["__meta_kubernetes_pod_container_name"]
+        		action        = "replace"
+        		target_label  = "container"
+        	}
+        }
+
+        loki.source.kubernetes "pod_logs" {
+        	targets    = discovery.relabel.pods.output
+        	forward_to = [loki.process.pod_logs.receiver]
+        }
+
+        loki.process "pod_logs" {
+        	stage.static_labels {
+        		values = {
+        			cluster = "prod",
+        		}
+        	}
+
+        	forward_to = [loki.write.o11y.receiver]
+        }
+
+        loki.write "o11y" {
+        	endpoint {
+        		url = "http://loki.vipyrsec.com:30080/loki/api/v1/push"
+        	}
+        }
+
+        prometheus.exporter.self "local" { }
+
+        prometheus.exporter.unix "local" { }
+
+        prometheus.exporter.cadvisor "local" { }
+
+        remote.kubernetes.secret "postgres" {
+        	namespace = "postgres"
+        	name      = "dragonfly"
+        }
+
+        prometheus.exporter.postgres "dragonfly" {
+        	data_source_names = [remote.kubernetes.secret.postgres.data.dsn]
+        }
+
+        prometheus.scrape "self" {
+        	targets    = prometheus.exporter.self.local.targets
+        	forward_to = [prometheus.relabel.tagged.receiver]
+        }
+
+        prometheus.scrape "node" {
+        	targets    = prometheus.exporter.unix.local.targets
+        	forward_to = [prometheus.relabel.tagged.receiver]
+        }
+
+        prometheus.scrape "cadvisor" {
+        	targets    = prometheus.exporter.cadvisor.local.targets
+        	forward_to = [prometheus.relabel.tagged.receiver]
+        }
+
+        prometheus.scrape "pods" {
+        	targets    = discovery.relabel.pods.output
+        	forward_to = [prometheus.relabel.tagged.receiver]
+        }
+
+        prometheus.scrape "postgres" {
+        	targets    = prometheus.exporter.postgres.dragonfly.targets
+        	forward_to = [prometheus.relabel.tagged.receiver]
+        }
+
+        prometheus.scrape "postgres_do" {
+        	targets    = [{"__address__" = remote.kubernetes.secret.postgres.data.metrics_url}]
+        	forward_to = [prometheus.relabel.tagged.receiver]
+
+        	basic_auth {
+        		username = remote.kubernetes.secret.postgres.data.metrics_username
+        		password = remote.kubernetes.secret.postgres.data.metrics_password
+        	}
+        }
+
+        prometheus.relabel "tagged" {
+        	rule {
+        		source_labels = ["__address__"]
+        		regex         = ".*"
+        		replacement   = "prod"
+        		target_label  = "cluster"
+        	}
+
+        	forward_to = [prometheus.remote_write.o11y.receiver]
+        }
+
+        prometheus.remote_write "o11y" {
+        	endpoint {
+        		url = "http://prom.vipyrsec.com:30080/api/v1/write"
+        	}
+        }

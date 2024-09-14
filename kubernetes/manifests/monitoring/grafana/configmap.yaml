@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-default
+  namespace: grafana 
+data:
+  # Root settings
+  GF_INSTANCE_NAME: "vipyrsec"
+  GF_SERVER_DOMAIN: "grafana.vipyrsec.com"
+  GF_SERVER_ROOT_URL: "https://grafana.vipyrsec.com"
+  GF_SECURITY_COOKIE_SECURE: "true"
+
+  # GitHub Auth
+  GF_AUTH_GITHUB_ENABLED: "true"
+  GF_AUTH_GITHUB_SCOPES: "user:email,read:org"
+  # IDs can be retrieved via `gh api orgs/python-discord/teams`.
+  GF_AUTH_GITHUB_TEAM_IDS: "7718058,8310922"
+  GF_AUTH_GITHUB_ROLE_ATTRIBUTE_PATH: "'Admin'"
+  GF_AUTH_GITHUB_AUTH_URL: "https://github.com/login/oauth/authorize"
+  GF_AUTH_GITHUB_TOKEN_URL: "https://github.com/login/oauth/access_token"
+  GF_AUTH_GITHUB_API_URL: "https://api.github.com/user"
+  GF_AUTH_ALLOW_SIGN_UP: "true"
+
+  # User sign up
+  GF_USERS_AUTO_ASSIGN_ORG: "true"
+  GF_USERS_AUTO_ASSIGN_ORG_ID: "1"
