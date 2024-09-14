@@ -104,11 +104,11 @@ alloy:
         }
 
         prometheus.scrape "postgres_do" {
-        	targets    = [{"__address__" = remote.kubernetes.secret.postgres.data.metrics_url}]
+        	targets    = [{"__address__" = nonsensitive(remote.kubernetes.secret.postgres.data.metrics_url)}]
         	forward_to = [prometheus.relabel.tagged.receiver]
 
         	basic_auth {
-        		username = remote.kubernetes.secret.postgres.data.metrics_username
+        		username = nonsensitive(remote.kubernetes.secret.postgres.data.metrics_username)
         		password = remote.kubernetes.secret.postgres.data.metrics_password
         	}
         }
