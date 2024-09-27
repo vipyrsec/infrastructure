@@ -1,0 +1,39 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+
+metadata:
+  name: vipyrsec
+
+rules:
+  - apiGroups:
+      - ''
+    resources:
+      - pods
+      - services
+      - configmaps
+    verbs:
+      - list
+
+  - apiGroups:
+      - apps
+    resources:
+      - daemonsets
+      - replicasets
+      - deployments
+    verbs:
+      - list
+
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+    verbs:
+      - list
+
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - list
