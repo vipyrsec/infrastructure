@@ -32,3 +32,5 @@ spec:
             runAsUser: 10000
             runAsGroup: 10000
             readOnlyRootFilesystem: true
+          ports:
+            - containerPort: 8000
