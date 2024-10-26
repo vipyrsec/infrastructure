@@ -1,10 +1,13 @@
+---
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   labels:
     app: grafana
   name: grafana
-  namespace: grafana 
+  namespace: grafana
+
 spec:
   selector:
     matchLabels:

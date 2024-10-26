@@ -7,10 +7,10 @@ You will need:
 - [`doctl`](https://docs.digitalocean.com/reference/doctl/how-to/install/) configured with a...
 - [Digital Ocean Personal Access Token](https://docs.digitalocean.com/reference/api/create-personal-access-token/) with
   at least the following scopes:
-  - kubernetes: create, delete
+  - `kubernetes`: `create`, `delete`
   - If replacing an existing cluster:
-    - load_balancer: read, delete
-    - database: read, update
+    - `load_balancer`: `read`, `delete`
+    - `database`: `read`, `update`
 - `PWD` set to the root of this repo
 - [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl)
 - [`helm`](https://helm.sh/docs/intro/install/)
@@ -49,11 +49,15 @@ I recommend using the DO Control Panel, but it is possible via the CLI as well.
 ### With CLI
 
 ```bash
-databasename=<database-name>
-clustername=<cluster-name>
+database_name=<database-name>
+cluster_name=<cluster-name>
 
-doctl databases firewalls append $(doctl databases list -o json | jq ".[] | select(.name == \"$databasename\") | .id" -r) \
-  --rule k8s:$(doctl k8s cluster get $clustername --format ID --no-header)
+doctl databases firewalls append \
+  "$(
+    doctl databases list -o json \
+|     jq -r ".[] | select(.name == \"$database_name\") | .id"
+  )" \
+  --rule "k8s:$(doctl k8s cluster get $cluster_name --format ID --no-header)"
 ```
 
 ## Apply `cert-manager` CRDs
@@ -82,6 +86,6 @@ kubectl apply -f ./kubernetes/manifests -R
 ## If replacing an existing cluster, destroy old resources
 
 ```bash
-doctl k8s cluster delete <name>
-doctl compute load-balancer delete <id>
+doctl k8s cluster delete <cluster-name>
+doctl compute load-balancer delete <load-balancer-id>
 ```

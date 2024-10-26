@@ -34,7 +34,7 @@ jobs:
         with:
           go-version: '1.22'
 
-      - name: Install `kubectl-validate`
+      - name: Install kubectl-validate
         run: go install -ldflags='-s -w' -race -trimpath sigs.k8s.io/kubectl-validate@latest
 
       - name: Lint manifests

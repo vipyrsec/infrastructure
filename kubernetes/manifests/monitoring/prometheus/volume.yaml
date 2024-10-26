@@ -1,10 +1,13 @@
+---
 kind: PersistentVolumeClaim
 apiVersion: v1
+
 metadata:
   name: prometheus-storage
   namespace: prometheus
   labels:
     app: prometheus
+
 spec:
   storageClassName: do-block-storage
   accessModes:
