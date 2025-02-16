@@ -24,7 +24,7 @@ This will,
 ./create_user.py foo -g vipyrsec
 ```
 
-2. Create a user `bar` with groups `vipyrsec`, and `vipyrsec-core-devs` with a day's validity
+1. Create a user `bar` with groups `vipyrsec`, and `vipyrsec-core-devs` with a day's validity
 
 ```bash
 ./create_user.py bar -g vipyrsec -g vipyrsec-core-devs --expiry-seconds 86400
