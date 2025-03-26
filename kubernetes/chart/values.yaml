@@ -18,7 +18,7 @@ loki:
 
   loki:
     image:
-      digest: sha256:cb233dada1ac1ab09b5fee5e99a081c3f0580c37863516daa02bc927cd8cadd8  # 3.0.1
+      digest: sha256:58a6c186ce78ba04d58bfe2a927eff296ba733a430df09645d56cdc158f3ba08 # 3.4.2
 
     # Disable auth, since we are in-cluster
     auth_enabled: false
@@ -33,7 +33,7 @@ loki:
       configs:
         - from: 2024-01-01
           store: tsdb
-          object_store: filesystem  # NOTE!: Since we're storing on the filesystem, there's no real persistence here
+          object_store: filesystem # NOTE!: Since we're storing on the filesystem, there's no real persistence here
           schema: v13
           index:
             prefix: loki_index_
@@ -87,7 +87,7 @@ alloy:
   enabled: false
 
   image:
-    digest: sha256:2381097248235e37c34a727103cf9ad0e11767defdab6f37646cff09acd2dbaf  # v1.3.1
+    digest: sha256:b92703c13c32c20d629ffd89f40287ed385c12a335a7c9f31c720a5f912f9d6f # v1.7.5
 
   alloy:
     configMap:
