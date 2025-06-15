@@ -4,7 +4,7 @@ dependencies:
   version: 4.12.3
 - name: cert-manager
   repository: https://charts.jetstack.io
-  version: v1.17.2
+  version: v1.18.0
 - name: metrics-server
   repository: https://kubernetes-sigs.github.io/metrics-server
   version: 3.12.2
@@ -14,5 +14,5 @@ dependencies:
 - name: loki
   repository: https://grafana.github.io/helm-charts
   version: 6.30.1
-digest: sha256:57db8afda82742906cf709810e52aa893b17a5c52e75bbf0168202609c426b75
-generated: "2025-06-14T15:51:56.289195724Z"
+digest: sha256:4b273869e926e6926ff7c49597a96e2596efab714729ca84ea903bc125e17a65
+generated: "2025-06-15T09:49:16.329434095Z"
