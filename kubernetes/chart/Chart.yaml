@@ -12,7 +12,7 @@ dependencies:
     version: 4.13.0
   - name: cert-manager
     repository: https://charts.jetstack.io
-    version: 1.18.1
+    version: 1.18.2
     condition: cert-manager.enabled
   - name: metrics-server
     repository: https://kubernetes-sigs.github.io/metrics-server
