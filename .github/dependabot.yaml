@@ -26,13 +26,13 @@ updates:
     directory: /
     multi-ecosystem-group: infra
     patterns:
-      - "*"
+      - '*'
 
   - package-ecosystem: helm
     directory: /kubernetes/chart/
     multi-ecosystem-group: infra
     patterns:
-      - "*"
+      - '*'
 
   - package-ecosystem: docker
     directories:
@@ -41,7 +41,7 @@ updates:
       - /kubernetes/manifests/monitoring/prometheus/
     multi-ecosystem-group: infra
     patterns:
-      - "*"
+      - '*'
 
   - package-ecosystem: docker
     directories:
@@ -54,4 +54,4 @@ updates:
       - /kubernetes/manifests/dragonfly/reporter/
     multi-ecosystem-group: apps
     patterns:
-      - "*"
+      - '*'

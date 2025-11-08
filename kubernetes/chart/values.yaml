@@ -29,6 +29,15 @@ loki:
     storage:
       type: filesystem
 
+      bucketNames:
+        chunks: loki-chunks
+
+    compactor:
+      retention_enabled: true
+
+    limits_config:
+      retention_period: 7d
+
     schemaConfig:
       configs:
         - from: 2024-01-01
