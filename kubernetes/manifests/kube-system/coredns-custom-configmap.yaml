@@ -10,14 +10,14 @@ data:
   loki.server: |
     loki.vipyrsec.com:53 {
       hosts {
-        10.124.0.9 loki.vipyrsec.com
+        10.124.0.7 loki.vipyrsec.com
         fallthrough
       }
     }
   prom.server: |-
     prom.vipyrsec.com:53 {
       hosts {
-        10.124.0.9 prom.vipyrsec.com
+        10.124.0.7 prom.vipyrsec.com
         fallthrough
       }
     }
