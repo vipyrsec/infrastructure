@@ -15,7 +15,7 @@ spec:
         spec:
           containers:
             - name: dragonfly-loader
-              image: ghcr.io/vipyrsec/dragonfly-loader:sha-d39d772488adacc893e496da2ea30fd16452fb8c
+              image: ghcr.io/vipyrsec/dragonfly-loader:sha-fc9128434c0f15b90e7f0ec686bd1932f3c5fd4a
               imagePullPolicy: IfNotPresent
               envFrom:
                 - secretRef:
