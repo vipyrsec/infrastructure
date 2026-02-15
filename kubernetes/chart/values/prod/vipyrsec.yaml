@@ -1,4 +1,10 @@
 ---
+ingress-nginx:
+  controller:
+    allowSnippetAnnotations: true
+    config:
+      annotations-risk-level: Critical
+
 alloy:
   enabled: true
 
