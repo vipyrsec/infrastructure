@@ -165,67 +165,136 @@ For the frontend application:
 The frontend already forces the GitHub connection on `/authorize`, but the application should also
 be limited in Auth0 so the tenant configuration matches the code path.
 
-### 4. Configure GitHub login securely
+### 4. Configure the standard Post-Login Action
 
 Configure the GitHub social connection with an organization-controlled OAuth app and restrict
 administration of that GitHub app.
 
-Use a Post-Login Action to enforce organization membership. The frontend does not verify GitHub
-organization membership itself, so this check belongs in Auth0.
+Use the standard Dragonfly Post-Login Action below to restrict access to the frontend application
+to members of the `vipyrsec` GitHub organization.
+
+This hook:
+
+- applies only to the `Dragonfly Frontend` Auth0 client
+- denies non-GitHub login attempts
+- exchanges Auth0 machine credentials for a Management API token
+- loads the current Auth0 user profile
+- reads the GitHub identity access token from the linked identity
+- verifies active membership in the `vipyrsec` GitHub organization
 
 Required Action secrets:
 
-- `ALLOWED_GITHUB_ORG`
-- `GITHUB_ORG_TOKEN`
+- `AUTH0_DOMAIN`
+- `AUTH0_MGMT_CLIENT_ID`
+- `AUTH0_MGMT_CLIENT_SECRET`
 
-`GITHUB_ORG_TOKEN` should be a GitHub token that can read organization membership for the target
-organization.
+The Management API application used by `AUTH0_MGMT_CLIENT_ID` must be allowed to request an Auth0
+Management API token for `https://<AUTH0_DOMAIN>/api/v2/`.
 
-Recommended Post-Login Action:
+Recommended minimum Management API scopes:
+
+- `read:users`
+- `read:user_idp_tokens`
+
+Standard Post-Login Action:
 
 ```js
 exports.onExecutePostLogin = async (event, api) => {
-  if (event.connection.strategy !== "github") {
-    api.access.deny("Only GitHub login is allowed for this application.");
+  if (event.client.name !== "Dragonfly Frontend") {
     return;
   }
 
-  const identity = event.user.identities?.find((item) => item.provider === "github");
-  const login =
-    identity?.profileData?.login ||
-    event.user.nickname ||
-    event.user.username;
-
-  if (!login) {
-    api.access.deny("GitHub login is missing a username.");
+  if (event.connection?.name !== "github") {
+    api.access.deny("GitHub login is required.");
     return;
   }
 
-  const response = await fetch(
-    `https://api.github.com/orgs/${event.secrets.ALLOWED_GITHUB_ORG}/memberships/${login}`,
+  const domain = event.secrets.AUTH0_DOMAIN;
+  const clientId = event.secrets.AUTH0_MGMT_CLIENT_ID;
+  const clientSecret = event.secrets.AUTH0_MGMT_CLIENT_SECRET;
+
+  if (!domain || !clientId || !clientSecret) {
+    api.access.deny("Auth0 management API secrets are not configured.");
+    return;
+  }
+
+  const tokenResponse = await fetch(`https://${domain}/oauth/token`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      audience: `https://${domain}/api/v2/`,
+      grant_type: "client_credentials"
+    })
+  });
+
+  if (!tokenResponse.ok) {
+    api.access.deny("Unable to get Auth0 management API token.");
+    return;
+  }
+
+  const tokenPayload = await tokenResponse.json();
+  const managementToken = tokenPayload.access_token;
+
+  const userResponse = await fetch(
+    `https://${domain}/api/v2/users/${encodeURIComponent(event.user.user_id)}`,
     {
       headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${event.secrets.GITHUB_ORG_TOKEN}`,
-        "User-Agent": "vipyrsec-auth0-post-login"
+        Authorization: `Bearer ${managementToken}`,
+        Accept: "application/json"
       }
     }
   );
 
-  if (response.status !== 200) {
-    api.access.deny("GitHub organization membership is required.");
+  if (!userResponse.ok) {
+    api.access.deny("Unable to load Auth0 user profile.");
+    return;
+  }
+
+  const user = await userResponse.json();
+  const githubIdentity = user.identities?.find((identity) => identity.provider === "github");
+
+  if (!githubIdentity?.access_token) {
+    api.access.deny("GitHub organization membership could not be verified.");
+    return;
+  }
+
+  const response = await fetch("https://api.github.com/user/memberships/orgs/vipyrsec", {
+    headers: {
+      Authorization: `Bearer ${githubIdentity.access_token}`,
+      Accept: "application/vnd.github+json",
+      "User-Agent": "auth0-dragonfly-frontend"
+    }
+  });
+
+  if (response.status === 404) {
+    api.access.deny("You must be a member of the vipyrsec GitHub organization.");
+    return;
+  }
+
+  if (!response.ok) {
+    api.access.deny("Unable to verify GitHub organization membership.");
     return;
   }
 
   const membership = await response.json();
+
   if (membership.state !== "active") {
-    api.access.deny("Active GitHub organization membership is required.");
+    api.access.deny("Your vipyrsec GitHub membership is not active.");
+    return;
   }
 };
 ```
 
-Bind this Action to the `Login / Post Login` trigger for every Dragonfly frontend application in
-the tenant.
+Bind this Action to the `Login / Post Login` trigger for the Dragonfly frontend application.
+
+Operational note:
+
+- If the Auth0 client display name differs from `Dragonfly Frontend`, update the hook or rename the
+  application so the client name check remains accurate.
 
 ### 5. Create roles and assign permissions
 
@@ -242,7 +311,7 @@ Operational guidance:
 
 For each approved operator:
 
-1. Confirm their GitHub account is a member of the allowed organization.
+1. Confirm their GitHub account is a member of the `vipyrsec` organization.
 2. Confirm the user can authenticate through the GitHub connection.
 3. Assign one or more Dragonfly roles in Auth0.
 
@@ -305,6 +374,9 @@ Complete this checklist for each environment.
 - [ ] The Post-Login Action is deployed
 - [ ] The Post-Login Action is attached to `Login / Post Login`
 - [ ] The Post-Login Action secrets are populated
+- [ ] The Management API client can obtain a token for `https://<AUTH0_DOMAIN>/api/v2/`
+- [ ] The Management API client includes `read:users`
+- [ ] The Management API client includes `read:user_idp_tokens`
 
 ### Application URLs
 
@@ -336,7 +408,7 @@ Complete this checklist for each environment.
 - [ ] Browsing to `/login` redirects to Auth0
 - [ ] The Auth0 authorize request includes the expected `connection` value
 - [ ] The Auth0 authorize request includes the expected `audience`
-- [ ] Login succeeds only for users in the allowed GitHub organization
+- [ ] Login succeeds only for users in the `vipyrsec` GitHub organization
 - [ ] A user with `read:packages` can load the dashboard
 - [ ] A user without `read:packages` is redirected to `/access-denied`
 - [ ] A user with `queue:packages` can queue packages
