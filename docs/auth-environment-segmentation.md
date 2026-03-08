@@ -36,8 +36,8 @@ the promotion steps required to keep those environments isolated.
   - `dragonfly-staging.vipyrsec.com`
   - `dragonfly.vipyrsec.com`
 - I did not find DNS records for:
-  - `mainframe-staging.vipyrsec.com`
-  - `mainframe.vipyrsec.com`
+  - `dashboard-staging.vipyrsec.com`
+  - `dashboard.vipyrsec.com`
 - Zone listing worked, but Cloudflare Access application inspection returned an authentication
   error. Access policy state still needs direct verification in the Cloudflare dashboard or with a
   token that includes Access scopes.
@@ -58,16 +58,16 @@ the promotion steps required to keep those environments isolated.
 
 The target deployment model is:
 
-- `mainframe-staging.vipyrsec.com`
+- `dashboard-staging.vipyrsec.com`
   - frontend hostname for staging
-  - Auth0 callback: `https://mainframe-staging.vipyrsec.com/auth/callback`
+  - Auth0 callback: `https://dashboard-staging.vipyrsec.com/auth/callback`
   - Auth0 tenant: staging tenant only
   - API audience: `https://dragonfly-staging.vipyrsec.com`
   - backend API: `https://dragonfly-staging.vipyrsec.com`
 
-- `mainframe.vipyrsec.com`
+- `dashboard.vipyrsec.com`
   - frontend hostname for production
-  - Auth0 callback: `https://mainframe.vipyrsec.com/auth/callback`
+  - Auth0 callback: `https://dashboard.vipyrsec.com/auth/callback`
   - Auth0 tenant: production tenant only
   - API audience: `https://dragonfly.vipyrsec.com`
   - backend API: `https://dragonfly.vipyrsec.com`
@@ -122,15 +122,15 @@ Recommended name: `Dragonfly Frontend Staging`
 
 Register only:
 
-- callback URL: `https://mainframe-staging.vipyrsec.com/auth/callback`
-- logout URL: `https://mainframe-staging.vipyrsec.com/login`
-- web origin: `https://mainframe-staging.vipyrsec.com`
+- callback URL: `https://dashboard-staging.vipyrsec.com/auth/callback`
+- logout URL: `https://dashboard-staging.vipyrsec.com/login`
+- web origin: `https://dashboard-staging.vipyrsec.com`
 
 Production should keep only:
 
-- callback URL: `https://mainframe.vipyrsec.com/auth/callback`
-- logout URL: `https://mainframe.vipyrsec.com/login`
-- web origin: `https://mainframe.vipyrsec.com`
+- callback URL: `https://dashboard.vipyrsec.com/auth/callback`
+- logout URL: `https://dashboard.vipyrsec.com/login`
+- web origin: `https://dashboard.vipyrsec.com`
 
 ### 3. Create a staging Auth0 API
 
@@ -151,8 +151,8 @@ Enable:
 
 Create DNS records and certificates for:
 
-- `mainframe-staging.vipyrsec.com`
-- `mainframe.vipyrsec.com`
+- `dashboard-staging.vipyrsec.com`
+- `dashboard.vipyrsec.com`
 
 Cloudflare should proxy both records and terminate TLS for both.
 
