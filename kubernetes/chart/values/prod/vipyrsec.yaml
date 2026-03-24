@@ -65,7 +65,7 @@ alloy:
 
         loki.write "o11y" {
         	endpoint {
-        		url = "http://loki.vipyrsec.com:30080/loki/api/v1/push"
+        		url = "https://loki.vipyrsec.com/loki/api/v1/push"
         	}
         }
 
@@ -82,6 +82,15 @@ alloy:
 
         prometheus.exporter.postgres "dragonfly" {
         	data_source_names = [remote.kubernetes.secret.postgres.data.dsn]
+        	enabled_collectors = [
+        		"locks",
+        		"replication",
+        		"replication_slot",
+        		"stat_bgwriter",
+        		"stat_database",
+        		"stat_user_tables",
+        		"statio_user_tables",
+        	]
         }
 
         prometheus.scrape "self" {
@@ -132,6 +141,6 @@ alloy:
 
         prometheus.remote_write "o11y" {
         	endpoint {
-        		url = "http://prom.vipyrsec.com:30080/api/v1/write"
+        		url = "https://prom.vipyrsec.com/api/v1/write"
         	}
         }
