@@ -6,6 +6,10 @@ cert-manager:
 
   namespace: cert-manager
 
+  # DigitalOcean requires timeout between 1 and 29 seconds, but the default is 30
+  webhook:
+    timeoutSeconds: 15
+
 ingress-nginx:
   controller:
     metrics:
