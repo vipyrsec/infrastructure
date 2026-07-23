@@ -10,9 +10,8 @@ This deployment expects a number of secrets and environment variables to exist i
 | Environment   | Description                               |
 | ------------- | ----------------------------------------- |
 | BASE_URL      | Base URL of the Dragonfly API             |
-| AUTH0_DOMAIN  | Domain of the AUTH0 authentication server |
-| CLIENT_ID     | Client ID                                 |
-| CLIENT_SECRET | Client secret                             |
-| USERNAME      | Username                                  |
-| PASSWORD      | Password                                  |
-| AUDIENCE      | Authentication audience                   |
+| CF_ACCESS_CLIENT_ID | Cloudflare Access service token client ID |
+| CF_ACCESS_CLIENT_SECRET | Cloudflare Access service token client secret |
+
+For staging, `BASE_URL` should be the public protected hostname
+`https://dragonfly-staging.vipyrsec.com`.
