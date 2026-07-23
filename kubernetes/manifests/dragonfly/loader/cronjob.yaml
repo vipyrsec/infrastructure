@@ -9,8 +9,10 @@ metadata:
 spec:
   schedule: '* * * * *'
   concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 120
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 120
       template:
         spec:
           containers:
