@@ -5,4 +5,5 @@ Our infrastructure
 ## Docs
 
 - `docs/bootstrap.md`
-- `docs/auth0-tenant-configuration.md`
+- `docs/cloudflare-access-migration.md`
+- `docs/dragonfly-loader-2026-07-23-recovery.md`

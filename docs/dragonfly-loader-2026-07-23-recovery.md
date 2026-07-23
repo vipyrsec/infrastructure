@@ -62,6 +62,6 @@ Loader image selection remains intentionally deferred:
 - latest successful main image build:
   `sha-74257a59ab7051d3c5d4cf3f08df020d599a9882`
 
-The newer loader line changes authentication from Auth0 to Cloudflare Access.
-Reconcile the target image and production credentials as a separate,
-explicitly reviewed change.
+The newer loader line changes authentication from the legacy provider to
+Cloudflare Access. Reconcile the target image and production credentials as a
+separate, explicitly reviewed change.
