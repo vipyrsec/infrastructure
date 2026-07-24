@@ -13,6 +13,10 @@ The following rules are mandatory:
 - policies select named service tokens; `any valid service token` is forbidden
 - callers use the public Cloudflare-protected hostname, never a forwarded or
   directly enumerable origin
+- public load balancers accept only Cloudflare's published origin-facing
+  networks
+- each hostname uses a separate custom Authenticated Origin Pulls certificate;
+  the shared global Cloudflare certificate is insufficient
 - Kubernetes Secret values remain cluster-local and are never committed
 - application and infrastructure PRs are approved before either environment is
   changed
@@ -31,7 +35,40 @@ The following rules are mandatory:
 
 The Cloudflare team domain is tenant-wide and may be the same in both
 environments. Application audiences, service-token IDs, service-token secrets,
-and Kubernetes Secret values must be different.
+Authenticated Origin Pulls certificates, and Kubernetes Secret values must be
+different.
+
+## Origin authentication
+
+Cloudflare Access authenticates users and machine callers at the edge, while
+mainframe validates the resulting assertion. The origin also requires two
+independent network controls:
+
+1. `ingress-nginx`'s public load balancer uses
+   `loadBalancerSourceRanges` containing Cloudflare's published IPv4 ranges.
+2. The Dragonfly Ingress requires a client certificate signed by the
+   environment-specific `dragonfly/cloudflare-aop-ca` Secret.
+
+Configure per-hostname Authenticated Origin Pulls with a custom certificate for
+each public API hostname. Do not use Cloudflare's shared global AOP certificate:
+it proves only that a request came from Cloudflare's network, not from this
+account. Upload only the matching leaf certificate and private key to
+Cloudflare. Store only the issuing CA's public certificate in the cluster
+Secret as `ca.crt`; do not commit any certificate private key.
+
+Record the certificate identifier and expiry in the private change record.
+Rotate the Cloudflare client certificate and cluster CA together before expiry,
+staging first. Keep the old CA in the verification bundle during a planned
+overlap if zero-downtime rotation is required.
+
+After every upload, verify that Cloudflare's
+`hostname_aop_custom_certificate_expiration_type` notification policy is
+enabled and has the intended recipients. Treat that native notification as the
+authoritative pre-expiry alert because Cloudflare stores the client
+certificate. Also monitor `ca.crt` expiry in both Kubernetes Secrets as a drift
+check. Use an external authenticated availability probe for each hostname:
+an AOP handshake failure occurs before a request reaches mainframe, so Sentry
+alone cannot detect an expired or mismatched client certificate.
 
 ## Pre-cutover evidence handling
 
@@ -148,21 +185,25 @@ Before changing staging:
 1. Confirm `doctl` context `vipyr` and Kubernetes context
    `do-sfo3-staging`.
 2. Create or reconcile the staging Access application and named policies.
-3. Create staging-only service tokens and write them directly to the matching
+3. Create the staging-only AOP certificate and `cloudflare-aop-ca` Secret,
+   enable its hostname association, and verify the association is active.
+4. Create staging-only service tokens and write them directly to the matching
    staging Kubernetes Secrets.
-4. Set the staging mainframe audience and team domain.
-5. Apply reviewed manifests and immutable application images.
-6. Wait for rollouts and the next loader CronJob; do not start duplicate Jobs.
-7. Exercise all nine protected routes:
+5. Set the staging mainframe audience and team domain.
+6. Apply reviewed manifests and immutable application images.
+7. Wait for rollouts and the next loader CronJob; do not start duplicate Jobs.
+8. Confirm a valid caller crosses AOP and direct-origin requests without the
+   environment-specific client certificate fail.
+9. Exercise all nine protected routes:
    - unauthenticated requests are rejected
    - legacy bearer requests are rejected
    - invalid assertions are rejected
    - valid human or service-token requests reach the application
-8. Confirm loader `POST /batch/package`, scanner `GET /rules`, scanner
+10. Confirm loader `POST /batch/package`, scanner `GET /rules`, scanner
    `POST /jobs`, scanner `PUT /package`, and all three bot routes succeed.
-9. Confirm application logs and Sentry contain no authentication regression,
+11. Confirm application logs and Sentry contain no authentication regression,
    crash loop, or unexpected origin traffic.
-10. Observe at least two scheduled loader executions with no overlapping or
+12. Observe at least two scheduled loader executions with no overlapping or
     stuck Job.
 
 ## Production rollout
@@ -170,16 +211,18 @@ Before changing staging:
 Production begins only after staging passes and its evidence is recorded.
 
 1. Confirm `doctl` context `vipyr` and Kubernetes context `do-sfo3-prod`.
-2. Create the production Access application, named policies, and production-only
+2. Create the production-only AOP certificate and `cloudflare-aop-ca` Secret,
+   enable its hostname association, and verify the association is active.
+3. Create the production Access application, named policies, and production-only
    service tokens.
-3. Write production values directly to production Kubernetes Secrets and the
+4. Write production values directly to production Kubernetes Secrets and the
    `dragonfly-production` GitHub environment.
-4. Apply the same reviewed manifest revision and application commits proven in
+5. Apply the same reviewed manifest revision and application commits proven in
    staging.
-5. Repeat the complete route and caller validation matrix.
-6. Confirm the loader schedule, scanner queue depth, result submissions,
+6. Repeat the AOP, direct-origin, complete route, and caller validation matrix.
+7. Confirm the loader schedule, scanner queue depth, result submissions,
    security-intelligence rule update, logs, and Sentry.
-7. Compare staging and production manifests, Secret key names, Access policy
+8. Compare staging and production manifests, Secret key names, Access policy
    shapes, and image commits. Only environment-specific hostnames, audiences,
    token identities, and secret values may differ.
 

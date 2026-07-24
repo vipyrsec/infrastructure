@@ -22,3 +22,9 @@ Staging and production must use different Access application audiences.
 `CF_ACCESS_TEAM_DOMAIN` may be shared because both applications belong to the
 same Cloudflare Zero Trust tenant; application audiences and caller service
 tokens must not be shared.
+
+The Ingress also expects `dragonfly/cloudflare-aop-ca` with a `ca.crt` key.
+This public CA verifies the environment-specific Cloudflare Authenticated
+Origin Pulls client certificate. Staging and production must use different
+certificate authorities; no CA private key or client private key belongs in
+this repository or cluster Secret.
