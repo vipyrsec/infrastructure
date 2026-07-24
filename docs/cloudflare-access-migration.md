@@ -33,6 +33,16 @@ The Cloudflare team domain is tenant-wide and may be the same in both
 environments. Application audiences, service-token IDs, service-token secrets,
 and Kubernetes Secret values must be different.
 
+## Pre-cutover evidence handling
+
+Keep the environment inventory and validation evidence in the private change
+record. Do not publish application, audience, policy, or token identifiers;
+exact runtime policy posture; secret values; or non-routed preparation
+hostnames in this repository.
+
+The private record must identify the existing application to update at cutover
+so operators do not create a duplicate application or audience.
+
 ## Protected route inventory
 
 All routes below must reject a missing assertion, a legacy bearer credential,
@@ -128,8 +138,10 @@ Before changing staging:
 - workflow audits report no findings
 - immutable image SHAs exist for every changed workload
 - current Cloudflare application, policy, token, DNS, Kubernetes image, and
-  Secret-key inventories are recorded without secret values
-- rollback image SHAs and prior Cloudflare policy identifiers are recorded
+  Secret-key inventories are recorded in the private change record without
+  secret values
+- rollback image SHAs and prior Cloudflare policy identifiers are recorded in
+  the private change record
 
 ## Staging rollout
 
@@ -191,7 +203,7 @@ bypass.
 
 ## Completion evidence
 
-Record in a dated infrastructure document:
+Record runtime evidence in the private change record:
 
 - merged application and infrastructure commit SHAs
 - immutable image SHAs deployed to each cluster
@@ -201,3 +213,8 @@ Record in a dated infrastructure document:
 - loader schedules and scanner result timestamps
 - Sentry issue or event links used for validation
 - removal of obsolete legacy-provider configuration and credentials
+
+The public infrastructure repository should contain only the reviewed
+configuration contract, rollout procedure, and a high-level completion record.
+Do not copy the private runtime inventory into a commit, pull request, issue,
+workflow log, or review comment.
