@@ -7,6 +7,9 @@ metadata:
   name: dragonfly-ingress
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/auth-tls-secret: dragonfly/cloudflare-aop-ca
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: 'on'
+    nginx.ingress.kubernetes.io/auth-tls-verify-depth: '1'
     nginx.ingress.kubernetes.io/server-snippet: |
       location /metrics {
         deny all;
