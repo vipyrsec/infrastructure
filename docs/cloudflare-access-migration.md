@@ -61,6 +61,15 @@ Rotate the Cloudflare client certificate and cluster CA together before expiry,
 staging first. Keep the old CA in the verification bundle during a planned
 overlap if zero-downtime rotation is required.
 
+After every upload, verify that Cloudflare's
+`hostname_aop_custom_certificate_expiration_type` notification policy is
+enabled and has the intended recipients. Treat that native notification as the
+authoritative pre-expiry alert because Cloudflare stores the client
+certificate. Also monitor `ca.crt` expiry in both Kubernetes Secrets as a drift
+check. Use an external authenticated availability probe for each hostname:
+an AOP handshake failure occurs before a request reaches mainframe, so Sentry
+alone cannot detect an expired or mismatched client certificate.
+
 ## Pre-cutover evidence handling
 
 Keep the environment inventory and validation evidence in the private change
