@@ -2,22 +2,20 @@
 ingress-nginx:
   controller:
     service:
-      type: NodePort
-      nodePorts:
-        http: 30080
-        https: 30443
+      type: LoadBalancer
+      annotations:
+        service.beta.kubernetes.io/do-loadbalancer-network: INTERNAL
 
 loki:
   enabled: true
 
-  # annotations:
-  #   cert-manager.io/cluster-issuer: letsencrypt
-
-  # ingress:
-  #   tls:
-  #     - hosts:
-  #         - loki.vipyrsec.com
-  #       secretName: loki-tls
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt
+    tls:
+      - hosts:
+          - loki.vipyrsec.com
+        secretName: loki-tls
 
 alloy:
   enabled: true
