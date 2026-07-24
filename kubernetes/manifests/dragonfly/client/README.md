@@ -5,12 +5,15 @@ Infra configuration for the Dragonfly client. We're currently using the
 
 ## Secrets
 
-This deployment expects a number of secrets and environment variables to exist in a secret called
-`dragonfly-client-secrets`.
+This deployment expects its environment variables to exist in a secret called
+`dragonfly-client-env`.
 
-| Environment   | Description                   |
-| ------------- | ----------------------------- |
-| CLIENT_ID     | Part of the OAUTH credentials |
-| CLIENT_SECRET | Part of the OAUTH credentials |
-| USERNAME      | Part of the OAUTH credentials |
-| PASSWORD      | Part of the OAUTH credentials |
+| Environment                           | Description                                                  |
+| ------------------------------------- | ------------------------------------------------------------ |
+| DRAGONFLY_BASE_URL                    | Environment-specific public Dragonfly API URL                |
+| DRAGONFLY_CF_ACCESS_CLIENT_ID         | Environment-specific Cloudflare Access service-token ID      |
+| DRAGONFLY_CF_ACCESS_CLIENT_SECRET     | Environment-specific Cloudflare Access service-token secret  |
+
+The staging secret must use `https://dragonfly-staging.vipyrsec.com`; the
+production secret must use `https://dragonfly.vipyrsec.com`. The two service
+tokens must be distinct.

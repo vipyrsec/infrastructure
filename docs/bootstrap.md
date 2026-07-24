@@ -17,7 +17,8 @@ You will need:
 
 ## Get secrets
 
-Create Kubernetes Secrets in the `./kubernetes/manifests` directory.
+Create Kubernetes Secrets directly in the target cluster. Never write secret
+values beneath `./kubernetes/manifests` or commit them.
 
 See the following list for secrets to create:
 
@@ -25,6 +26,12 @@ See the following list for secrets to create:
 - [Mainframe](https://github.com/vipyrsec/dragonfly-mainframe/README.md)
 - [Loader](https://github.com/vipyrsec/dragonfly-loader/README.md)
 - [Client](https://github.com/vipyrsec/dragonfly-client-rs/README.md)
+
+Use different values for staging and production even where the Kubernetes
+Secret object names are identical. Confirm the `kubectl` context before
+creating or updating any Secret. The required Cloudflare Access keys and their
+environment boundaries are documented in
+[`docs/cloudflare-access-migration.md`](cloudflare-access-migration.md).
 
 ## Create the cluster in Digital Ocean
 

@@ -39,7 +39,7 @@ This will,
 kubectl delete clusterrolebinding <user>@<group>
 ```
 
-### Example
+### Revoke one role example
 
 Revoke user `foo`'s access granted by `vipyrsec-core-devs`
 
@@ -56,7 +56,7 @@ kubectl delete clusterrolebinding foo@vipyrsec-core-devs
 kubectl delete clusterrolebinding -luser=<user>
 ```
 
-### Example
+### Revoke every role example
 
 Revoke all permissions granted to user `foo`
 

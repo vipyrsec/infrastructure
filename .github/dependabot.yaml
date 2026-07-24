@@ -3,18 +3,18 @@ version: 2
 enable-beta-ecosystems: true
 
 multi-ecosystem-groups:
-  infra:
+  infrastructure-dependencies:
     schedule:
-      interval: monthly
+      interval: weekly
     commit-message:
       prefix: deps(infra)
     labels:
       - dependencies
       - infra
 
-  apps:
+  application-dependencies:
     schedule:
-      interval: daily
+      interval: weekly
     commit-message:
       prefix: deps(apps)
     labels:
@@ -24,13 +24,13 @@ multi-ecosystem-groups:
 updates:
   - package-ecosystem: github-actions
     directory: /
-    multi-ecosystem-group: infra
+    multi-ecosystem-group: infrastructure-dependencies
     patterns:
       - '*'
 
   - package-ecosystem: helm
     directory: /kubernetes/chart/
-    multi-ecosystem-group: infra
+    multi-ecosystem-group: infrastructure-dependencies
     patterns:
       - '*'
 
@@ -39,7 +39,7 @@ updates:
       - /kubernetes/manifests/cert-manager/
       - /kubernetes/manifests/monitoring/grafana/
       - /kubernetes/manifests/monitoring/prometheus/
-    multi-ecosystem-group: infra
+    multi-ecosystem-group: infrastructure-dependencies
     patterns:
       - '*'
 
@@ -52,6 +52,6 @@ updates:
       - /kubernetes/manifests/dragonfly/loader/
       - /kubernetes/manifests/dragonfly/mainframe/
       - /kubernetes/manifests/dragonfly/reporter/
-    multi-ecosystem-group: apps
+    multi-ecosystem-group: application-dependencies
     patterns:
       - '*'
