@@ -16,3 +16,5 @@ This deployment expects a number of secrets and environment variables to exist i
 | CF_ACCESS_CLIENT_SECRET | Environment-specific Cloudflare Access service-token secret  |
 
 Staging and production must use separate service tokens and API URLs.
+Each bot reads the cached `/queue-status` endpoint from its own
+`DRAGONFLY_API_URL`, so bot commands do not query PostgreSQL.
