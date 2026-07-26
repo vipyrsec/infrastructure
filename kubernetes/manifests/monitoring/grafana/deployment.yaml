@@ -59,7 +59,30 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/grafana
               name: grafana-volume
+            - mountPath: /etc/grafana/provisioning/dashboards/dragonfly.yaml
+              name: grafana-dashboard-provider
+              readOnly: true
+              subPath: dragonfly.yaml
+            - mountPath: /etc/grafana/dashboards/dragonfly
+              name: grafana-dashboards
+              readOnly: true
       volumes:
         - name: grafana-volume
           persistentVolumeClaim:
             claimName: grafana-storage
+        - name: grafana-dashboard-provider
+          configMap:
+            name: grafana-dashboard-provider
+        - name: grafana-dashboards
+          projected:
+            sources:
+              - configMap:
+                  name: grafana-dashboard-queue-pressure
+                  items:
+                    - key: queue-pressure.json
+                      path: queue-pressure.json
+              - configMap:
+                  name: grafana-dashboard-rule-performance
+                  items:
+                    - key: rule-performance.json
+                      path: rule-performance.json
