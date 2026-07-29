@@ -56,9 +56,15 @@ spec:
                 name: grafana-default
             - secretRef:
                 name: grafana-secret-env
+            - secretRef:
+                name: grafana-alerting-secret
           volumeMounts:
             - mountPath: /var/lib/grafana
               name: grafana-volume
+            - mountPath: /etc/grafana/provisioning/alerting/dragonfly-staging.yaml
+              name: grafana-alerting-staging
+              readOnly: true
+              subPath: dragonfly-staging.yaml
             - mountPath: /etc/grafana/provisioning/dashboards/dragonfly.yaml
               name: grafana-dashboard-provider
               readOnly: true
@@ -70,6 +76,9 @@ spec:
         - name: grafana-volume
           persistentVolumeClaim:
             claimName: grafana-storage
+        - name: grafana-alerting-staging
+          configMap:
+            name: grafana-alerting-staging
         - name: grafana-dashboard-provider
           configMap:
             name: grafana-dashboard-provider
