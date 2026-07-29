@@ -3,6 +3,9 @@
 Infra configuration for the Dragonfly client. We're currently using the
 [Dragonfly Rust client](https://github.com/vipyrsec/dragonfly-client-rs).
 
+The Kubernetes deployment is scaled to zero in staging and production because
+the active scanners run on DigitalOcean App Platform.
+
 ## Secrets
 
 This deployment expects its environment variables to exist in a secret called
