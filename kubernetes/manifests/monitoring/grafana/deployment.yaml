@@ -9,6 +9,8 @@ metadata:
   namespace: grafana
 
 spec:
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: grafana

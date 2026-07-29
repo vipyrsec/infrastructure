@@ -2,6 +2,10 @@
 
 We use Grafana to display our metrics and logs from across our infrastructure.
 
+Grafana stores its SQLite database and search indexes on a single-writer
+persistent volume. The Deployment therefore uses the `Recreate` strategy so two
+Grafana processes never access those files concurrently during a rollout.
+
 The Grafana deployment expects a secret named `grafana-secret-env` with the following contents:
 
 | Environment Variable         | Description                                         |
