@@ -1,0 +1,428 @@
+---
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: grafana-alerting-prod
+  namespace: grafana
+
+data:
+  dragonfly-prod.yaml: |-
+    apiVersion: 1
+
+    contactPoints:
+      - orgId: 1
+        name: discord-prod-alerts
+        receivers:
+          - uid: discord-prod-alerts
+            type: discord
+            disableResolveMessage: false
+            settings:
+              url: $GF_ALERTING_DISCORD_WEBHOOK_URL
+              use_discord_username: false
+              message: |
+                **VIPYR GRAFANA ALERT — PROD**
+                {{ template "default.message" . }}
+
+    groups:
+      - orgId: 1
+        name: dragonfly-prod
+        folder: Dragonfly Alerts
+        interval: 1m
+        rules:
+          - uid: dragonfly-prod-deadletters
+            title: '[PROD] Dead-letter growth above baseline'
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 1800
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: >-
+                    sum by (cluster) (
+                      increase(
+                        packages_dead_lettered_total{
+                          cluster="prod",
+                          namespace="dragonfly",
+                          container="mainframe"
+                        }[30m]
+                      )
+                    )
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: B
+                relativeTimeRange:
+                  from: 604800
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: >-
+                    avg_over_time(
+                      (
+                        sum by (cluster) (
+                          increase(
+                            packages_dead_lettered_total{
+                              cluster="prod",
+                              namespace="dragonfly",
+                              container="mainframe"
+                            }[30m]
+                          )
+                        )
+                      )[7d:30m]
+                    )
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: B
+              - refId: C
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: '$A >= 2 && $A > 3 * $B'
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: math
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 5m
+            annotations:
+              summary: '[PROD] Dead-lettering is significantly above normal'
+              description: >-
+                Production dead-lettered {{ $values.A.Value }} packages in 30
+                minutes versus a rolling seven-day average of
+                {{ $values.B.Value }}.
+            labels:
+              environment: prod
+              service: dragonfly-mainframe
+              severity: critical
+            isPaused: false
+            notification_settings:
+              receiver: discord-prod-alerts
+
+          - uid: dragonfly-prod-failures
+            title: '[PROD] Failed-package growth above baseline'
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 900
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: >-
+                    sum by (cluster) (
+                      increase(
+                        packages_fail_total{
+                          cluster="prod",
+                          namespace="dragonfly",
+                          container="mainframe"
+                        }[15m]
+                      )
+                    )
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: B
+                relativeTimeRange:
+                  from: 604800
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: >-
+                    avg_over_time(
+                      (
+                        sum by (cluster) (
+                          increase(
+                            packages_fail_total{
+                              cluster="prod",
+                              namespace="dragonfly",
+                              container="mainframe"
+                            }[15m]
+                          )
+                        )
+                      )[7d:15m]
+                    )
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: B
+              - refId: C
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: '$A >= 10 && $A > 3 * $B'
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: math
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 10m
+            annotations:
+              summary: '[PROD] Package failures are significantly above normal'
+              description: >-
+                Production failed {{ $values.A.Value }} packages in 15 minutes
+                versus a rolling seven-day average of {{ $values.B.Value }}.
+            labels:
+              environment: prod
+              service: dragonfly-mainframe
+              severity: warning
+            isPaused: false
+            notification_settings:
+              receiver: discord-prod-alerts
+
+          - uid: dragonfly-prod-queue-pressure
+            title: '[PROD] Queue pressure rising above baseline'
+            condition: D
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: >-
+                    max by (cluster) (
+                      packages_in_queue{
+                        cluster="prod",
+                        namespace="dragonfly",
+                        container="mainframe"
+                      }
+                    )
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: B
+                relativeTimeRange:
+                  from: 604800
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: >-
+                    max by (cluster) (
+                      avg_over_time(
+                        packages_in_queue{
+                          cluster="prod",
+                          namespace="dragonfly",
+                          container="mainframe"
+                        }[7d]
+                      )
+                    )
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: B
+              - refId: C
+                relativeTimeRange:
+                  from: 1800
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: >-
+                    max by (cluster) (
+                      packages_in_queue{
+                        cluster="prod",
+                        namespace="dragonfly",
+                        container="mainframe"
+                      } offset 30m
+                    )
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: C
+              - refId: D
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - D
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: '$A >= 100 && $A > 3 * $B && $A - $C >= 50'
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: D
+                  type: math
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 10m
+            annotations:
+              summary: '[PROD] Queue pressure is high and continuing to rise'
+              description: >-
+                Production queue depth is {{ $values.A.Value }}, versus a rolling
+                seven-day average of {{ $values.B.Value }} and
+                {{ $values.C.Value }} 30 minutes ago.
+            labels:
+              environment: prod
+              service: dragonfly-mainframe
+              severity: critical
+            isPaused: false
+            notification_settings:
+              receiver: discord-prod-alerts
+
+          - uid: dragonfly-prod-no-activity
+            title: '[PROD] No package activity'
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: >-
+                    sum by (cluster) (
+                      increase(
+                        packages_ingested_total{
+                          cluster="prod",
+                          namespace="dragonfly",
+                          container="mainframe"
+                        }[10m]
+                      )
+                    )
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: B
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: >-
+                    sum by (cluster) (
+                      increase(
+                        packages_success_total{
+                          cluster="prod",
+                          namespace="dragonfly",
+                          container="mainframe"
+                        }[10m]
+                      )
+                    )
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: B
+              - refId: C
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: '$A < 1 && $B < 1'
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: math
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 2m
+            annotations:
+              summary: '[PROD] No packages were queued or scanned successfully'
+              description: >-
+                Production recorded {{ $values.A.Value }} ingested packages and
+                {{ $values.B.Value }} successful scans during the last 10
+                minutes.
+            labels:
+              environment: prod
+              service: dragonfly-mainframe
+              severity: critical
+            isPaused: false
+            notification_settings:
+              receiver: discord-prod-alerts

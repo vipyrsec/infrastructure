@@ -67,6 +67,10 @@ spec:
               name: grafana-alerting-staging
               readOnly: true
               subPath: dragonfly-staging.yaml
+            - mountPath: /etc/grafana/provisioning/alerting/dragonfly-prod.yaml
+              name: grafana-alerting-prod
+              readOnly: true
+              subPath: dragonfly-prod.yaml
             - mountPath: /etc/grafana/provisioning/dashboards/dragonfly.yaml
               name: grafana-dashboard-provider
               readOnly: true
@@ -81,6 +85,9 @@ spec:
         - name: grafana-alerting-staging
           configMap:
             name: grafana-alerting-staging
+        - name: grafana-alerting-prod
+          configMap:
+            name: grafana-alerting-prod
         - name: grafana-dashboard-provider
           configMap:
             name: grafana-dashboard-provider

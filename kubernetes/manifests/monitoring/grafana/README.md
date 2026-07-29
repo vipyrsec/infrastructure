@@ -25,9 +25,10 @@ update the Kubernetes secret out of band; never commit the webhook URL.
 
 ## Provisioned alerts
 
-`alerting-staging.yaml` provisions staging-only Dragonfly alert rules and a
-staging-branded Discord contact point. Every rule filters on `cluster="staging"`
-and includes an `environment=staging` label plus a `[STAGING]` summary.
+`alerting-staging.yaml` and `alerting-prod.yaml` provision independent Dragonfly
+rule groups and environment-branded Discord contact points. Every rule filters
+on its exact `cluster` label and includes a matching `environment` label,
+summary prefix, and Discord banner.
 
 The rules use the existing o11y Prometheus data source and alert on:
 
