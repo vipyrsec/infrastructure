@@ -9,7 +9,7 @@ metadata:
 data:
   ENVIRONMENT: staging
   OPENGREP_SHADOW_API_ORIGIN: https://dragonfly-staging.vipyrsec.com
-  OPENGREP_SHADOW_ENABLED: 'true'
+  OPENGREP_SHADOW_ENABLED: 'false'
 
 ---
 apiVersion: v1
@@ -20,4 +20,4 @@ metadata:
   namespace: discord
 
 data:
-  DRAGONFLY_OPENGREP_SHADOW_ENABLED: 'true'
+  DRAGONFLY_OPENGREP_SHADOW_ENABLED: 'false'
