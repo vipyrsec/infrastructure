@@ -5,6 +5,10 @@
 Evaluate OpenGrep behavioral findings in staging without changing the existing
 YARA scanner, its queue, its scores, or its production alert stream.
 
+The shadow pipeline is paused while alert-only queue gating is deployed. Both
+staging feature flags remain `false`, and the App Platform shadow worker remains
+absent, until the corrected Mainframe and bot images pass review.
+
 ## Isolation invariants
 
 1. The YARA worker continues to use `/jobs`, `/rules`, and `/package`.
