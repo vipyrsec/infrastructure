@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: dragonfly-mainframe-opengrep-shadow
+  namespace: dragonfly
+
+data:
+  ENVIRONMENT: staging
+  OPENGREP_SHADOW_ENABLED: 'true'
+
+---
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: dragonfly-bot-opengrep-shadow
+  namespace: discord
+
+data:
+  DRAGONFLY_OPENGREP_SHADOW_ENABLED: 'true'

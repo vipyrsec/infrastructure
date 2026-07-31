@@ -24,6 +24,11 @@ Staging and production must use different Access application audiences.
 same Cloudflare Zero Trust tenant; application audiences and caller service
 tokens must not be shared.
 
+The optional `dragonfly-mainframe-opengrep-shadow` ConfigMap exists only in
+the staging environment directory. Mainframe also verifies that the
+environment-specific Access audience is the staging API before enabling the
+shadow endpoints.
+
 The Ingress also expects `dragonfly/cloudflare-aop-ca` with a `ca.crt` key.
 This public CA verifies the environment-specific Cloudflare Authenticated
 Origin Pulls client certificate. Staging and production must use different

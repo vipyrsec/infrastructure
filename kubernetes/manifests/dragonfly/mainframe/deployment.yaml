@@ -18,11 +18,14 @@ spec:
     spec:
       containers:
         - name: mainframe
-          image: ghcr.io/vipyrsec/dragonfly-mainframe:sha-faa55d9ac4900bf299c5c4597e72538f02dd5622
+          image: ghcr.io/vipyrsec/dragonfly-mainframe:sha-dc735d9dac4ef3f8b0c19a762cf0886bf40a7a25
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
                 name: dragonfly-mainframe-env
+            - configMapRef:
+                name: dragonfly-mainframe-opengrep-shadow
+                optional: true
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

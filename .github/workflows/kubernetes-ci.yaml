@@ -49,3 +49,6 @@ jobs:
           kubectl-validate kubernetes/manifests/ \
             --local-crds kubernetes/crds/ \
             --version "${KUBERNETES_VERSION}"
+          kubectl-validate kubernetes/environments/ \
+            --local-crds kubernetes/crds/ \
+            --version "${KUBERNETES_VERSION}"
