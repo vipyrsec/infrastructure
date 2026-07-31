@@ -91,11 +91,12 @@ qualifying alert, Mainframe reinitializes that single row for a fresh scan.
 
 ## Discord delivery
 
-The bot sends one bounded summary message per completed OpenGrep scan. When
-findings exist, it creates a thread from that message and sends bounded chunks
-of finding evidence. Each chunk remains within Discord's message limit. The
-summary and thread creation are retried through the bot's existing polling
-loop; Mainframe records delivery only after the complete thread is published.
+The bot replies inside the originating package-alert thread for each completed
+OpenGrep scan. Equivalent findings are grouped by rule with consolidated
+locations, and every reply remains within Discord's message limit. Thread
+creation and replies are retried through the bot's existing polling loop;
+Mainframe can replace a deleted checkpointed thread and records delivery only
+after the complete replacement thread is published.
 
 ## Rollback
 
