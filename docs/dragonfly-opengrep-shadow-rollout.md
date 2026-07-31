@@ -32,8 +32,9 @@ YARA scanner, its queue, its scores, or its production alert stream.
 - Component kind: worker
 - Component size: `apps-s-1vcpu-1gb` (1 shared vCPU, 1 GiB RAM)
 - Component count: 1
-- Image: `ghcr.io/vipyrsec/dragonfly-client-rs-opengrep-shadow` pinned
-  by immutable digest
+- Image:
+  `ghcr.io/vipyrsec/dragonfly-client-rs-opengrep-shadow@sha256:2fc392fc3cd4c8daba2117ffdb0c30d70b7c9ea5b05660951857c964e47fec11`
+- Source tag: `sha-2566bec3fd45f59d130aea75524ce5b6eeb42f22`
 - Cloudflare Access application: `Mainframe`
 - Access application ID: `a252d918-8780-40d3-b44c-a66ef899d5d6`
 - Access domain: `dragonfly-staging.vipyrsec.com`
