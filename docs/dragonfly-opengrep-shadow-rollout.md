@@ -48,6 +48,13 @@ DRAGONFLY_THREADS=1
 DRAGONFLY_BULK_SIZE=1
 ```
 
+Staging Mainframe receives
+`OPENGREP_SHADOW_API_ORIGIN=https://dragonfly-staging.vipyrsec.com` from the
+staging-only ConfigMap. Its startup guard requires this exact origin while
+shadow mode is enabled. Cloudflare's Access audience remains environment
+provided through `CF_ACCESS_AUDIENCE`; its value is not embedded in
+application source.
+
 `DRAGONFLY_CF_ACCESS_CLIENT_ID` and
 `DRAGONFLY_CF_ACCESS_CLIENT_SECRET` are encrypted App Platform environment
 variables. Create a dedicated one-year Access service token and add only its
