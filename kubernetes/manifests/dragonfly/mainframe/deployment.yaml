@@ -23,6 +23,9 @@ spec:
           envFrom:
             - secretRef:
                 name: dragonfly-mainframe-env
+            - configMapRef:
+                name: dragonfly-mainframe-opengrep-shadow
+                optional: true
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

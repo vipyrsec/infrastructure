@@ -23,6 +23,9 @@ spec:
           envFrom:
             - secretRef:
                 name: bot-env
+            - configMapRef:
+                name: dragonfly-bot-opengrep-shadow
+                optional: true
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
