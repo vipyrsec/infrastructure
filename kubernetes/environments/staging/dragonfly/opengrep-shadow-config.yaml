@@ -8,6 +8,7 @@ metadata:
 
 data:
   ENVIRONMENT: staging
+  OPENGREP_SHADOW_API_ORIGIN: https://dragonfly-staging.vipyrsec.com
   OPENGREP_SHADOW_ENABLED: 'true'
 
 ---
