@@ -167,15 +167,15 @@ rollouts with one of one replicas ready. DigitalOcean App
 at digest
 `sha256:62a7b64d7a0d0967fe2dc581ce8b061169aeb5a27f99c4f7f730403b5b90a028`.
 
-The first observed post-deployment OpenGrep job reused findings for 38 files
-across two distributions and completed in 10.734 seconds with zero findings
-and `partial=false`. Mainframe accepted the result and publication lifecycle
-requests with HTTP 200 responses. The bot loaded its Dragonfly extension and
-sent its startup notification successfully.
+The first observed post-deployment OpenGrep job reused cached scan results for
+38 files across two distributions and completed in 10.734 seconds with zero
+findings and `partial=false`. Mainframe accepted the result and publication
+lifecycle requests with HTTP 200 responses. The bot loaded its Dragonfly
+extension and sent its startup notification successfully.
 
 To roll back this performance revision without changing schema or secrets,
 restore the previous immutable reference for each affected component from the
-table above. Wait for both Kubernetes rollouts and the App Platform deployment
+list above. Wait for both Kubernetes rollouts and the App Platform deployment
 to become healthy before evaluating the rollback. The nullable Mainframe
 field reused for partial diagnostics requires no reverse database migration;
 older workers omit the new response field safely.
