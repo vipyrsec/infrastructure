@@ -38,8 +38,8 @@ Ordinary package ingestion does not create OpenGrep work.
 - Component size: `apps-s-1vcpu-1gb` (1 shared vCPU, 1 GiB RAM)
 - Component count: 1
 - Image:
-  `ghcr.io/vipyrsec/dragonfly-client-rs-opengrep-shadow@sha256:475e447d0432ed143b74b0175f96cc25dfbca80a13abb34633672251517b9a24`
-- Source tag: `sha-271876f9690d6c3070fa93b3d25683e683547e68`
+  `ghcr.io/vipyrsec/dragonfly-client-rs-opengrep-shadow@sha256:c39e869700924c89bb7090b77ae58253f9bcb44081846ffb452554b4edbe0c4b`
+- Source tag: `sha-7ec7f4a7ea3822a269f04b5eb157b41e181b5f2b`
 - Cloudflare Access application: `Mainframe`
 - Access domain: `dragonfly-staging.vipyrsec.com`
 
@@ -124,3 +124,58 @@ bounded staging experiment. Pausing the YARA component does not redirect YARA
 jobs to OpenGrep, and pausing OpenGrep does not redirect shadow jobs to YARA.
 Record instance counts, component sizes, package cohort, wall-clock duration,
 and result counts for every comparison window.
+
+## 2026-08-01 performance rollout record
+
+The partial-result, package-wide file-reuse, and Inspector-link changes were
+deployed to staging after every pull request check passed. Greptile assigned
+the worker, Mainframe, and bot changes confidence scores of 5/5 with no
+remaining issues. The OpenGrep rule validation change deployed automatically
+through security-intelligence workflow run `30684318724`.
+
+The deployment changed only these immutable workload references:
+
+- Mainframe previous:
+  `ghcr.io/vipyrsec/dragonfly-mainframe:sha-46e5bf72be98a8c7d69944b17eb78b026b3860ac`
+  at digest
+  `sha256:5c8409796b7c1291575dcdf22ba3c3751dbd5dbdb4af321536e0f7d25805dfc5`.
+- Mainframe deployed:
+  `ghcr.io/vipyrsec/dragonfly-mainframe:sha-cde9d3e7217f9ad7b95033279101c7a4f56e5b80`
+  at digest
+  `sha256:d6f10438d4e039d8f77553a6b4f8992562e19356e47dbce8f57ea4006e97f88e`.
+- Bot previous:
+  `ghcr.io/vipyrsec/bot:sha-869821537d8f19d2265a97e3bcc04babec580f03`
+  at digest
+  `sha256:e8165bf64c8d3fa3aab531deff8d39f2b9d85a97cef64489d660fc1eb5a95917`.
+- Bot deployed:
+  `ghcr.io/vipyrsec/bot:sha-a33ea65e51861de395cb445b1f5e04f01c0e1cf9`
+  at digest
+  `sha256:84d65f3c791e74e7a3492f547cfa0757acd45f43cc1b4e8180fdcf15c6a91a71`.
+- OpenGrep shadow previous:
+  `ghcr.io/vipyrsec/dragonfly-client-rs-opengrep-shadow`
+  at digest
+  `sha256:475e447d0432ed143b74b0175f96cc25dfbca80a13abb34633672251517b9a24`.
+- OpenGrep shadow deployed:
+  `ghcr.io/vipyrsec/dragonfly-client-rs-opengrep-shadow`
+  at digest
+  `sha256:c39e869700924c89bb7090b77ae58253f9bcb44081846ffb452554b4edbe0c4b`.
+
+Kubernetes context `do-sfo3-staging` reported successful Mainframe and bot
+rollouts with one of one replicas ready. DigitalOcean App
+`9d243898-5b30-4ab8-a432-df4b22bd356a` activated deployment
+`c5be1503-d049-441d-9917-c80ea3b9308b`; the existing `scanner` worker remained
+at digest
+`sha256:62a7b64d7a0d0967fe2dc581ce8b061169aeb5a27f99c4f7f730403b5b90a028`.
+
+The first observed post-deployment OpenGrep job reused findings for 38 files
+across two distributions and completed in 10.734 seconds with zero findings
+and `partial=false`. Mainframe accepted the result and publication lifecycle
+requests with HTTP 200 responses. The bot loaded its Dragonfly extension and
+sent its startup notification successfully.
+
+To roll back this performance revision without changing schema or secrets,
+restore the previous immutable reference for each affected component from the
+table above. Wait for both Kubernetes rollouts and the App Platform deployment
+to become healthy before evaluating the rollback. The nullable Mainframe
+field reused for partial diagnostics requires no reverse database migration;
+older workers omit the new response field safely.
