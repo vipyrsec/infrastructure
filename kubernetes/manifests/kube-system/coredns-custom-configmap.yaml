@@ -7,17 +7,24 @@ metadata:
   namespace: kube-system
 
 data:
-  loki.server: |
-    loki.vipyrsec.com:53 {
+  prom.server: |
+    prom.vipyrsec.com:53 {
       hosts {
-        10.124.0.11 loki.vipyrsec.com
+        10.124.0.2 prom.vipyrsec.com
         fallthrough
       }
     }
-  prom.server: |-
-    prom.vipyrsec.com:53 {
+  loki.server: |
+    loki.vipyrsec.com:53 {
       hosts {
-        10.124.0.11 prom.vipyrsec.com
+        10.124.0.2 loki.vipyrsec.com
+        fallthrough
+      }
+    }
+  grafana.server: |
+    grafana.vipyrsec.com:53 {
+      hosts {
+        10.124.0.2 grafana.vipyrsec.com
         fallthrough
       }
     }
