@@ -26,6 +26,17 @@ ingress-nginx:
 
 alloy:
   enabled: true
+  controller:
+    priorityClassName: vipyrsec-node-telemetry
+  extraObjects:
+    - apiVersion: scheduling.k8s.io/v1
+      kind: PriorityClass
+      metadata:
+        name: vipyrsec-node-telemetry
+      value: 1000
+      globalDefault: false
+      preemptionPolicy: Never
+      description: Schedule node telemetry ahead of ordinary workloads without evicting running pods.
 
   alloy:
     resources:
