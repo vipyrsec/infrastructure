@@ -1,5 +1,10 @@
 # Node resource and telemetry recovery
 
+September 14 completion: both environments run matching shared workload images
+and Kubernetes 1.34.10-do.4. Both have the YARA and OpenGrep workers, three healthy
+node/container collectors, and the incident fixes. The threat-intelligence feed
+is intentionally disabled. Reporter retains its production-only role.
+
 The September 13–14, 2026 incidents exposed memory pressure, unaccounted workload
 requests, and missing per-container metrics. The production bot, Mainframe, and
 reporter together used approximately 500 MiB during investigation, while Alloy,
@@ -242,3 +247,50 @@ existing resource budget. This causes a brief API outage during application
 rollouts. The startup/readiness probes prevent routing requests before the
 replacement finishes initialization. Additional capacity and replicas are needed
 for application upgrades without downtime.
+
+## Completion verification
+
+The user clarified that staging should not have a threat-intelligence feed token.
+Removed only `TIF_ACCESS_TOKEN` from staging's existing `discord/bot-env` Secret
+and restarted its bot. All other Secret keys were preserved. The removed value
+came from that existing Secret and was rejected by GitHub; its issuer/expiry were
+unknown. It was not revoked through GitHub or moved into source control.
+Both environments intentionally leave this separate feed disabled.
+
+The production OpenGrep App deployment
+`33c33d68-c405-4061-b0b3-7d18505a72a3` became ACTIVE. After the API rollout and
+ConfigMap references were corrected, the worker authenticated and polled for
+OpenGrep jobs successfully at 17:43:07 UTC. The production bot was then enabled.
+
+All 22 shared Kubernetes Deployment, DaemonSet, and CronJob specifications have
+identical container and init-container image references. Reporter remains an
+intentional production-only workload. The three production nodes now run
+Kubernetes v1.34.10, matching staging; DigitalOcean reports `1.34.10-do.4`.
+
+During concurrent rollout, an ordinary pod could consume the slot freed by an
+Alloy replacement before the new collector was queued. After setting the
+non-preempting priority, the production bot's feature rollout and a final staging
+Mainframe rollout released those occupied slots. Pending higher-priority
+collectors could then schedule first. Future maintenance should roll collectors
+to readiness before starting application rollouts, rather than starting both
+at once. Priority does not make an undersized node able to fit every service.
+
+At 17:46 UTC production accepted a qualifying alert, leased OpenGrep work, and
+accepted the worker's result with HTTP 200 (`/opengrep/alerts`, `/opengrep/jobs`,
+and `/opengrep/package`). The existing YARA pipeline continued separately.
+Production reporter was rolled onto the ingress/metrics-server node, freeing a
+slot for Mainframe on a node where Alloy had already updated. Mainframe was then
+rolled so the queued collector could claim its node-local request. This completed
+the collector-first placement transition without changing application images.
+
+Production's first OpenGrep scan of `brigade-cli` version
+`0.28.0.dev20260914` completed at 17:47:04 UTC in 56.542 seconds with 30 findings
+and `partial=false`. The bot subsequently completed publication; Mainframe
+returned HTTP 200 for the thread/chunk checkpoints and `/published`.
+
+Final telemetry showed all three node scrapes and all three container scrapes
+healthy in each environment. Available node memory was 35–48%, one-minute loads
+were 0.26–0.54, and five-minute memory stall ratios remained below 0.3%.
+Alloy's priority rollout completed in both environments. API startup/readiness
+checks passed on the final Mainframe pods. These observations follow deployment
+and should be reviewed again under peak ingestion load.
