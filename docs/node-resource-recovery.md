@@ -109,3 +109,86 @@ this rollout. Environment-specific endpoints and credentials remain distinct.
 The production worker mirrors staging's one `apps-s-1vcpu-1gb` component with one
 thread and one package per batch. The existing YARA worker stays at one
 `apps-s-1vcpu-0.5gb` instance in each App.
+
+Staging's old worker still packed both CoreDNS replicas and metrics-server after
+scale-out. Its Alloy replacement could not reserve 256 MiB. Restart metrics-server
+with its existing rolling strategy and image so the scheduler can place its
+replacement using the new capacity, freeing the collector's node-local budget.
+
+## Verified rollout state at 17:24 UTC
+
+Merged infrastructure PRs #189 and #190, bot PRs #340 and #341,
+Mainframe PR #423, and OpenGrep worker PR #9. Bot and Mainframe are running the same verified
+registry digests in both environments, with zero restarts on their new pods:
+
+| Component | Digest |
+| --- | --- |
+| Bot | `sha256:4ad61264d725efd012d025d7dd397cb49c8de482821f71b3829f2e6d61fb3d24` |
+| Mainframe | `sha256:86a1e77676043b6495d1930bd08c5b93aff5a79c90493472da5070a03e65c865` |
+| OpenGrep | `sha256:996a3e7239f39d383ed8ec5defc9e3b225c3ef03c9677ef55c1aeb2674c04a38` |
+| Existing YARA workers | `sha256:62a7b64d7a0d0967fe2dc581ce8b061169aeb5a27f99c4f7f730403b5b90a028` |
+
+Staging's OpenGrep App deployment
+`1224cb95-8b26-4c79-8752-5e772adb12e3` is ACTIVE on the new digest. The update
+changed only the image and preserved all encrypted App settings unchanged. Its
+YARA worker kept the existing digest. Registry digests were checked against
+published CI output; the OpenGrep signing workflow completed successfully.
+
+Production completed the additive migrations through `a71dc40e9b82`. Both APIs
+serve normal scan traffic successfully. The staging bot completed the OpenGrep
+publication lifecycle against the updated API. Production OpenGrep remains
+explicitly disabled until the new worker's credentials can be configured.
+
+The bot uses the full 256 MiB request in both environments. The production bot
+and Mainframe now occupy different workers. Reporter retains its production-only
+role and image; its resource update completed. Both Alloy DaemonSets have three
+ready replicas. Prometheus reports three healthy node scrapes and three healthy
+kubelet/cAdvisor scrapes per environment, with pod/container labels present.
+Live PostgreSQL collector settings were preserved during the collector patches.
+
+At 17:24 UTC all six nodes had 34–49% available memory and load averages below
+0.6. The previously distressed production node had 34% available memory and a
+0.25 one-minute load, compared with approximately 4% available memory and load
+40 during investigation. Five-minute memory stall ratios were below 0.3% on the
+available series. These are immediate post-rollout observations, not a long-term
+capacity guarantee.
+
+Grafana's existing Recreate deployment was restarted after updating both alert
+ConfigMaps. Alert provisioning completed and the alert scheduler started. The
+existing folder migration logged a duplicate-folder cleanup failure because the
+folder contains 16 alert rules; the folder was retained and provisioning finished.
+No rule or folder was deleted manually.
+
+## Remaining explicitly blocked steps
+
+Automatic approval review rejected credential access for a bot-token diagnostic
+and a production Kubernetes upgrade. No bypass or indirect credential extraction
+was attempted. Complete these steps only after explicit approval:
+
+1. Provision the production OpenGrep component in
+   `dragonfly-scanner-production` (`847aeafc-4716-433c-add8-adb668d49dd6`). Use the
+   verified OpenGrep digest above, name `opengrep-shadow`, one
+   `apps-s-1vcpu-1gb` instance, `DRAGONFLY_THREADS=1`, `DRAGONFLY_BULK_SIZE=1`, and
+   `DRAGONFLY_BASE_URL=https://dragonfly.vipyrsec.com`. Configure a production
+   Cloudflare Access service identity in encrypted runtime variables
+   `DRAGONFLY_CF_ACCESS_CLIENT_ID` and `DRAGONFLY_CF_ACCESS_CLIENT_SECRET`.
+   Record its origin and expiration after provisioning; neither exists yet.
+2. Apply `kubernetes/environments/production/dragonfly/opengrep-shadow-config.yaml`
+   and restart Mainframe, then the bot. Verify job leases, submitted results,
+   and thread publication without altering YARA scores or backfilling history.
+3. Upgrade production from `1.34.8-do.3` to staging's `1.34.10-do.4` using the
+   supported DigitalOcean cluster upgrade. That exact upgrade was offered by
+   DigitalOcean. Do not patch managed kube-proxy images directly. Expect rolling
+   node replacement and possible brief workload disruption.
+4. Investigate the staging threat-intelligence feed's GitHub HTTP 401 using an
+   explicitly authorized credential check. Production logs show that this feed
+   is disabled because its token is unconfigured. Do not reuse a personal GitHub
+   token or claim the feed is healthy without checking the intended service token.
+
+The complete user-requested end state has not been reached while these steps are
+pending. Existing matching Kubernetes infrastructure images were preserved;
+managed kube-proxy remains v1.34.8 in production and v1.34.10 in staging.
+
+At 17:24:56 UTC the updated staging OpenGrep worker completed a real scan of
+`people-context` version `1.2.1` in 12.212 seconds, reporting two findings and
+`partial=false`, then resumed its normal idle polling.

@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: reporter
-          image: ghcr.io/vipyrsec/dragonfly-reporter:sha-9c1704821c630121c37eb5fcaaeb3926451cf439
+          image: ghcr.io/vipyrsec/dragonfly-reporter:bb1f612c75ce88b635f6e58b1614edfb8a486ce7@sha256:2598baba561d6795aa3697f7a1146bfcc756d283fd0882a1133d81b497f7c88a
           imagePullPolicy: IfNotPresent
           resources:
             requests:
