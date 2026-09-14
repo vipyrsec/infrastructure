@@ -426,3 +426,242 @@ data:
             isPaused: false
             notification_settings:
               receiver: discord-staging-alerts
+
+          - uid: node-staging-memory
+            title: '[STAGING] Node memory headroom below 10%'
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: >-
+                    node_memory_MemAvailable_bytes{cluster="staging"}
+                    / node_memory_MemTotal_bytes{cluster="staging"}
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: $A < 0.1
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: math
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 5m
+            annotations:
+              summary: '[STAGING] Node memory headroom below 10%'
+              description: Node {{ $labels.instance }} has less than 10% available memory. Check reclaim
+                pressure and container working sets before increasing concurrency.
+            labels:
+              environment: staging
+              service: kubernetes
+              severity: critical
+            isPaused: false
+            notification_settings:
+              receiver: discord-staging-alerts
+          - uid: node-staging-memory-stalls
+            title: '[STAGING] Node memory stalls above 10%'
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: rate(node_pressure_memory_waiting_seconds_total{cluster="staging"}[5m])
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: $A > 0.1
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: math
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 5m
+            annotations:
+              summary: '[STAGING] Node memory stalls above 10%'
+              description: Tasks on {{ $labels.instance }} are stalled on memory more than 10% of the
+                time. Inspect file-cache refaults and workload placement.
+            labels:
+              environment: staging
+              service: kubernetes
+              severity: critical
+            isPaused: false
+            notification_settings:
+              receiver: discord-staging-alerts
+          - uid: node-staging-node-telemetry
+            title: '[STAGING] Node metrics missing'
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: count(up{cluster="staging",job="integrations/unix"} == 1) or vector(0)
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: $A < 2
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: math
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 5m
+            annotations:
+              summary: '[STAGING] Node metrics missing'
+              description: Expected healthy node telemetry from both workers. Missing series must not
+                be interpreted as zero usage. Update the expected count when the node pool size changes.
+            labels:
+              environment: staging
+              service: kubernetes
+              severity: critical
+            isPaused: false
+            notification_settings:
+              receiver: discord-staging-alerts
+          - uid: node-staging-container-telemetry
+            title: '[STAGING] Container metrics missing'
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: bdw7z1jhaby80e
+                model:
+                  editorMode: code
+                  expr: count(up{cluster="staging",job="prometheus.scrape.cadvisor"} == 1) or vector(0)
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: $A < 2
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: math
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 5m
+            annotations:
+              summary: '[STAGING] Container metrics missing'
+              description: Expected kubelet cAdvisor metrics from both workers. Check Alloy, kubelet proxy
+                authorization, and node availability. Update the expected count when the pool size changes.
+            labels:
+              environment: staging
+              service: kubernetes
+              severity: critical
+            isPaused: false
+            notification_settings:
+              receiver: discord-staging-alerts

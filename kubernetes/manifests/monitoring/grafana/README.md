@@ -36,6 +36,12 @@ The rules use the existing o11y Prometheus data source and alert on:
 - failed-package growth over the rolling seven-day average;
 - queue depth that is both abnormally high and rising;
 - no package ingestion or successful scans during the preceding ten minutes.
+- low node memory headroom or sustained memory stalls;
+- fewer than two healthy node or container telemetry targets in either environment.
+
+The node telemetry rules assume two workers per cluster. Update the expected
+counts when resizing a pool. See `docs/node-resource-recovery.md` for resource
+budgets, collection changes, validation, and the staged rollout procedure.
 
 The Prometheus deployment retains one week of data, so the rolling baseline uses
 all available history. Alert rules route directly to the staging contact point

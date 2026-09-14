@@ -20,6 +20,12 @@ spec:
         - name: reporter
           image: ghcr.io/vipyrsec/dragonfly-reporter:sha-9c1704821c630121c37eb5fcaaeb3926451cf439
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 10m
+              memory: 96Mi
+            limits:
+              memory: 192Mi
           envFrom:
             - secretRef:
                 name: dragonfly-reporter-env
