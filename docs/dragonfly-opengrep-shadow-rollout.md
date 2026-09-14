@@ -1,6 +1,18 @@
 # Dragonfly OpenGrep Shadow Rollout
 
-## Purpose
+## September 2026 production expansion
+
+The September 14 rollout supersedes the staging-only restriction below.
+Production now uses the same application and standalone OpenGrep images as staging.
+Mainframe validates that the enabled feature uses its own environment's API
+origin; the bot and worker allow only the production and staging HTTPS origins.
+OpenGrep remains isolated from YARA scoring and jobs, and only follows qualifying
+alerts. The production App receives one matching OpenGrep worker.
+
+See `node-resource-recovery.md` for deployment and capacity changes. The historical
+staging rollout details below describe the original launch, not current limits.
+
+## Original purpose
 
 Evaluate OpenGrep behavioral findings in staging without changing the existing
 YARA scanner, its queue, its scores, or its production alert stream.

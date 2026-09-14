@@ -587,7 +587,7 @@ data:
                   datasource:
                     type: __expr__
                     uid: __expr__
-                  expression: $A < 2
+                  expression: $A < 3
                   intervalMs: 1000
                   maxDataPoints: 43200
                   refId: C
@@ -597,7 +597,7 @@ data:
             for: 5m
             annotations:
               summary: '[STAGING] Node metrics missing'
-              description: Expected healthy node telemetry from both workers. Missing series must not
+              description: Expected healthy node telemetry from all three workers. Missing series must not
                 be interpreted as zero usage. Update the expected count when the node pool size changes.
             labels:
               environment: staging
@@ -646,7 +646,7 @@ data:
                   datasource:
                     type: __expr__
                     uid: __expr__
-                  expression: $A < 2
+                  expression: $A < 3
                   intervalMs: 1000
                   maxDataPoints: 43200
                   refId: C
@@ -656,7 +656,7 @@ data:
             for: 5m
             annotations:
               summary: '[STAGING] Container metrics missing'
-              description: Expected kubelet cAdvisor metrics from both workers. Check Alloy, kubelet proxy
+              description: Expected kubelet cAdvisor metrics from all three workers. Check Alloy, kubelet proxy
                 authorization, and node availability. Update the expected count when the pool size changes.
             labels:
               environment: staging

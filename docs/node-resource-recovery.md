@@ -42,7 +42,7 @@ exposed root-cgroup metrics without usable pod/container identities.
 
 Existing Grafana environment contact points gain rules for less than 10% available
 node memory, more than 10% memory stall time, and missing node/container telemetry.
-The telemetry count rules expect **two workers per production/staging cluster**.
+The telemetry count rules expect **three workers per production/staging cluster**.
 Update both counts when pool size changes. A missing series evaluates as zero
 healthy workers rather than implying zero utilization. Rules wait five minutes
 before firing and retain the environment's existing Discord receiver.
@@ -91,3 +91,21 @@ The added Grafana PromQL was checked with `promtool check rules --lint=all
 --lint-fatal`. Synthetic PromQL tests cover two workers, a missing worker, all
 metrics absent, and environment isolation. Promtool test storage must use an
 isolated temporary directory, never the live Prometheus data directory.
+
+## September 14 rollout updates
+
+The first staging rollout proved the two-node pool could not schedule the bot
+with the observed-memory requests: nodes already reserved 1234 and 1346 MiB of
+1465 MiB allocatable memory. A temporary bot request of 192 MiB restored service
+while a third `s-1vcpu-2gb` node was provisioned in each environment. Restore the
+256 MiB request after capacity is Ready. No existing nodes were removed.
+
+Both pools now have a desired count of three. Telemetry alerts expect three
+healthy workers. The added nodes provide scheduling headroom; they do not replace
+measurement of host overhead or workload tuning.
+
+Image parity and the new production OpenGrep worker are authorized as part of
+this rollout. Environment-specific endpoints and credentials remain distinct.
+The production worker mirrors staging's one `apps-s-1vcpu-1gb` component with one
+thread and one package per batch. The existing YARA worker stays at one
+`apps-s-1vcpu-0.5gb` instance in each App.
