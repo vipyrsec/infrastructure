@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: dragonfly-mainframe-opengrep-shadow
+  namespace: dragonfly
+
+data:
+  ENVIRONMENT: production
+  OPENGREP_SHADOW_API_ORIGIN: https://dragonfly.vipyrsec.com
+  OPENGREP_SHADOW_ENABLED: 'true'
+
+---
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: dragonfly-bot-opengrep-shadow
+  namespace: discord
+
+data:
+  DRAGONFLY_OPENGREP_SHADOW_ENABLED: 'true'

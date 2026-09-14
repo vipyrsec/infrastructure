@@ -31,7 +31,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
       containers:
         - name: bot
-          image: ghcr.io/vipyrsec/bot:sha-869821537d8f19d2265a97e3bcc04babec580f03@sha256:e8165bf64c8d3fa3aab531deff8d39f2b9d85a97cef64489d660fc1eb5a95917
+          image: ghcr.io/vipyrsec/bot:sha-c88873535cfd3398c8326c8a6bc6e769701b821d@sha256:4ad61264d725efd012d025d7dd397cb49c8de482821f71b3829f2e6d61fb3d24
           imagePullPolicy: IfNotPresent
           resources:
             requests:
