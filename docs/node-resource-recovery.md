@@ -159,11 +159,12 @@ existing folder migration logged a duplicate-folder cleanup failure because the
 folder contains 16 alert rules; the folder was retained and provisioning finished.
 No rule or folder was deleted manually.
 
-## Remaining explicitly blocked steps
+## Approval checkpoint before completion
 
 Automatic approval review rejected credential access for a bot-token diagnostic
 and a production Kubernetes upgrade. No bypass or indirect credential extraction
-was attempted. Complete these steps only after explicit approval:
+was attempted. The user subsequently explicitly authorized these operations. The completion record
+below supersedes this checkpoint:
 
 1. Provision the production OpenGrep component in
    `dragonfly-scanner-production` (`847aeafc-4716-433c-add8-adb668d49dd6`). Use the
@@ -192,3 +193,52 @@ managed kube-proxy remains v1.34.8 in production and v1.34.10 in staging.
 At 17:24:56 UTC the updated staging OpenGrep worker completed a real scan of
 `people-context` version `1.2.1` in 12.212 seconds, reporting two findings and
 `partial=false`, then resumed its normal idle polling.
+
+## Authorized completion
+
+The user explicitly approved service-credential access/configuration and the
+production Kubernetes upgrade. DigitalOcean accepted the production upgrade to
+`1.34.10-do.4` on September 14.
+
+The production OpenGrep component mirrors staging's image, one instance, 1 GiB
+size, one thread, and one-package batches. It targets the production API and
+shares the existing production YARA scanner's Cloudflare Access service identity.
+The encrypted credential fields are copied within the same production App;
+no staging credentials or personal GitHub credentials are used. The source is
+the existing production `scanner` component's encrypted runtime configuration.
+Its expiration is not available in the App specification; it is unchanged by this
+rollout. Rotate both production scanner components together when rotating this
+shared service identity. The existing YARA component is preserved unchanged.
+
+Production Mainframe receives the merged production OpenGrep ConfigMap before
+worker provisioning. The bot is enabled only after the worker is healthy.
+
+The separate threat-feed credential check confirmed staging's service token is
+rejected by GitHub with HTTP 401 and production has no token. This is not a
+scanner authentication problem. Credential access alone cannot renew a revoked
+or expired external credential; its issuing service or replacement is required.
+
+The managed upgrade temporarily returned HTTP 525/502 while ingress and API pods
+moved to replacement nodes. Production's live Deployments did not yet reference
+the optional OpenGrep ConfigMaps present in source. Add those environment sources
+explicitly while preserving existing Secret references.
+
+Add HTTP startup/readiness probes to Mainframe's metadata endpoint. Kubernetes
+must wait for database initialization and rule loading before routing requests or
+finishing an application rollout. Startup allows five minutes; readiness checks
+every five seconds. The endpoint does not require external credentials.
+
+Both environments' Alloy pods use the non-preempting
+`vipyrsec-node-telemetry` PriorityClass (1000). This orders pending collectors
+ahead of ordinary workloads after node replacement without evicting running pods;
+it does not create capacity or guarantee placement on an already full node.
+Production metrics-server was rolled with its existing image after the upgrade
+to free the collector slot on a packed node, as in staging's capacity rollout.
+
+The three small nodes fit steady-state requests but could not reserve another
+256 MiB for Mainframe's surge replica. Its singleton Deployment now uses
+`maxSurge: 0` and `maxUnavailable: 1`, allowing updates to finish within its
+existing resource budget. This causes a brief API outage during application
+rollouts. The startup/readiness probes prevent routing requests before the
+replacement finishes initialization. Additional capacity and replicas are needed
+for application upgrades without downtime.

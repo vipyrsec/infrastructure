@@ -8,6 +8,11 @@ metadata:
 
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: mainframe
@@ -41,6 +46,20 @@ spec:
             runAsUser: 10000
             runAsGroup: 10000
             readOnlyRootFilesystem: true
+          startupProbe:
+            httpGet:
+              path: /
+              port: http-metrics
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http-metrics
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
           ports:
             - name: http-metrics
               containerPort: 8000
