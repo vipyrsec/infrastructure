@@ -78,6 +78,12 @@ message, capped at 400 characters. The default expression and label dump is
 omitted. Messages stay below Discord’s 2,000-character limit; oversized groups include an explicit omission notice and
 a link to the complete alert list.
 
+Contact-point message variables use `$$` in provisioning files because Grafana
+expands environment variables in receiver settings. Grafana stores a single `$`
+in the resulting Go template. Preview the stored template after provisioning as
+well as the unescaped source; the preview API alone does not perform provisioning
+substitution. Rule annotations use ordinary `$values` and `$labels`.
+
 Update both environment files together. Rule annotations hold the descriptions,
 threshold explanations, recovery summaries, and investigation steps. The expected
 worker count in descriptions must stay aligned with the telemetry expressions.

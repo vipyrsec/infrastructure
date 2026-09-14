@@ -22,50 +22,51 @@ data:
               use_discord_username: false
               title: 'VIPYR — PROD — {{ .Status | toUpper }}'
               message: |
-                {{- $body := "" -}}
-                {{- $omitted := false -}}
+                {{- $$body := "" -}}
+                {{- $$omitted := false -}}
                 {{- range .Alerts -}}
-                  {{- $reason := index .Annotations "grafana_state_reason" -}}
-                  {{- $summary := or .Annotations.summary .Labels.alertname "Monitoring alert" -}}
-                  {{- if and (eq .Status "resolved") (not $reason) .Annotations.resolved_summary -}}
-                    {{- $summary = .Annotations.resolved_summary -}}
+                  {{- $$reason := index .Annotations "grafana_state_reason" -}}
+                  {{- $$summary := or .Annotations.summary .Labels.alertname "Monitoring alert" -}}
+                  {{- if and (eq .Status "resolved") (not $$reason) .Annotations.resolved_summary -}}
+                    {{- $$summary = .Annotations.resolved_summary -}}
                   {{- end -}}
-                  {{- $entry := printf "**%s — %.120s**\n" (toUpper .Status) $summary -}}
-                  {{- $entry = printf "%s%s · %.60s" $entry
+                  {{- $$entry := printf "**%s — %.120s**\n" (toUpper .Status) $$summary -}}
+                  {{- $$entry = printf "%s%s · %.60s" $$entry
                       (toUpper .Labels.environment) (or .Labels.service "monitoring") -}}
-                  {{- with .Labels.severity }}{{ $entry = printf "%s · %.20s" $entry . }}{{ end -}}
-                  {{- with .Labels.instance }}{{ $entry = printf "%s · %.100s" $entry . }}{{ end -}}
-                  {{- $entry = printf "%s\n" $entry -}}
-                  {{- if $reason -}}
-                    {{- $entry = printf "%sState reason: %.100s. Verify the alert before assuming recovery.\n"
-                        $entry $reason -}}
+                  {{- with .Labels.severity }}{{ $$entry = printf "%s · %.20s" $$entry . }}{{ end -}}
+                  {{- with .Labels.instance }}{{ $$entry = printf "%s · %.100s" $$entry . }}{{ end -}}
+                  {{- $$entry = printf "%s\n" $$entry -}}
+                  {{- if $$reason -}}
+                    {{- $$entry = printf "%sState reason: %.100s. Verify the alert before assuming recovery.\n"
+                        $$entry $$reason -}}
                   {{- else -}}
                     {{- with .Annotations.description -}}
-                      {{- $entry = printf "%sLast evaluation: %.250s\n" $entry . -}}
+                      {{- $$entry = printf "%sLast evaluation: %.250s\n" $$entry . -}}
                     {{- end -}}
                   {{- end -}}
                   {{- if eq .Status "firing" -}}
-                    {{- with .Annotations.threshold }}{{ $entry = printf "%sTrigger: %.150s\n" $entry . }}{{ end -}}
-                    {{- $action := or .Annotations.action
+                    {{- with .Annotations.threshold }}{{ $$entry = printf "%sTrigger: %.150s\n" $$entry . }}{{ end -}}
+                    {{- $$action := or .Annotations.action
                         "Inspect the alert query and data source for missing telemetry or errors." -}}
-                    {{- $entry = printf "%sCheck: %.220s\n" $entry $action -}}
+                    {{- $$entry = printf "%sCheck: %.220s\n" $$entry $$action -}}
                   {{- end -}}
-                  {{- with .Annotations.Error }}{{ $entry = printf "%sEvaluation error: %.400s\n" $entry . }}{{ end -}}
-                  {{- $entry = printf "%sStarted: %s" $entry (.StartsAt.UTC.Format "2006-01-02 15:04 UTC") -}}
+                  {{- with .Annotations.Error }}{{ $$entry = printf "%sEvaluation error: %.400s\n"
+                      $$entry . }}{{ end -}}
+                  {{- $$entry = printf "%sStarted: %s" $$entry (.StartsAt.UTC.Format "2006-01-02 15:04 UTC") -}}
                   {{- if eq .Status "resolved" -}}
-                    {{- $entry = printf "%s · Ended: %s" $entry (.EndsAt.UTC.Format "2006-01-02 15:04 UTC") -}}
+                    {{- $$entry = printf "%s · Ended: %s" $$entry (.EndsAt.UTC.Format "2006-01-02 15:04 UTC") -}}
                   {{- end -}}
-                  {{- with .GeneratorURL }}{{ $entry = printf "%s\n[View alert](%s)" $entry . }}{{ end -}}
-                  {{- $candidate := printf "%s%s\n\n" $body $entry -}}
-                  {{- if le (len $candidate) 1750 -}}
-                    {{- $body = $candidate -}}
+                  {{- with .GeneratorURL }}{{ $$entry = printf "%s\n[View alert](%s)" $$entry . }}{{ end -}}
+                  {{- $$candidate := printf "%s%s\n\n" $$body $$entry -}}
+                  {{- if le (len $$candidate) 1750 -}}
+                    {{- $$body = $$candidate -}}
                   {{- else -}}
-                    {{- $omitted = true -}}
+                    {{- $$omitted = true -}}
                   {{- end -}}
                 {{- end -}}
                 {{ len .Alerts.Firing }} firing · {{ len .Alerts.Resolved }} resolved
-                {{ $body -}}
-                {{- if $omitted -}}
+                {{ $$body -}}
+                {{- if $$omitted -}}
                 Some alerts omitted to fit Discord. [View all alerts](https://grafana.vipyrsec.com/alerting/list)
                 {{- end -}}
 
