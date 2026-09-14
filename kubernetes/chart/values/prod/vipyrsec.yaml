@@ -37,66 +37,66 @@ alloy:
     configMap:
       content: |-
         logging {
-        	level  = "info"
-        	format = "logfmt"
+            level  = "info"
+            format = "logfmt"
         }
 
         discovery.kubernetes "pods" {
-        	role = "pod"
+            role = "pod"
 
-        	selectors {
-        		role  = "pod"
-        		field = "spec.nodeName=" + sys.env("HOSTNAME")
-        	}
+            selectors {
+                role  = "pod"
+                field = "spec.nodeName=" + sys.env("HOSTNAME")
+            }
         }
 
         discovery.relabel "pods" {
-        	targets = discovery.kubernetes.pods.targets
+            targets = discovery.kubernetes.pods.targets
 
-        	rule {
-        		source_labels = ["__meta_kubernetes_namespace"]
-        		action        = "replace"
-        		target_label  = "namespace"
-        	}
+            rule {
+                source_labels = ["__meta_kubernetes_namespace"]
+                action        = "replace"
+                target_label  = "namespace"
+            }
 
-        	rule {
-        		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
-        		action        = "replace"
-        		target_label  = "app"
-        	}
+            rule {
+                source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+                action        = "replace"
+                target_label  = "app"
+            }
 
-        	rule {
-        		source_labels = ["__meta_kubernetes_pod_name"]
-        		action        = "replace"
-        		target_label  = "pod"
-        	}
+            rule {
+                source_labels = ["__meta_kubernetes_pod_name"]
+                action        = "replace"
+                target_label  = "pod"
+            }
 
-        	rule {
-        		source_labels = ["__meta_kubernetes_pod_container_name"]
-        		action        = "replace"
-        		target_label  = "container"
-        	}
+            rule {
+                source_labels = ["__meta_kubernetes_pod_container_name"]
+                action        = "replace"
+                target_label  = "container"
+            }
         }
 
         loki.source.kubernetes "pod_logs" {
-        	targets    = discovery.relabel.pods.output
-        	forward_to = [loki.process.pod_logs.receiver]
+            targets    = discovery.relabel.pods.output
+            forward_to = [loki.process.pod_logs.receiver]
         }
 
         loki.process "pod_logs" {
-        	stage.static_labels {
-        		values = {
-        			cluster = "prod",
-        		}
-        	}
+            stage.static_labels {
+                values = {
+                    cluster = "prod",
+                }
+            }
 
-        	forward_to = [loki.write.o11y.receiver]
+            forward_to = [loki.write.o11y.receiver]
         }
 
         loki.write "o11y" {
-        	endpoint {
-        		url = "http://loki.vipyrsec.com:30080/loki/api/v1/push"
-        	}
+            endpoint {
+                url = "http://loki.vipyrsec.com:30080/loki/api/v1/push"
+            }
         }
 
         prometheus.exporter.self "local" { }
@@ -104,86 +104,86 @@ alloy:
         prometheus.exporter.unix "local" { }
 
         remote.kubernetes.secret "postgres" {
-        	namespace = "postgres"
-        	name      = "dragonfly"
+            namespace = "postgres"
+            name      = "dragonfly"
         }
 
         prometheus.exporter.postgres "dragonfly" {
-        	data_source_names = [remote.kubernetes.secret.postgres.data.dsn]
+            data_source_names = [remote.kubernetes.secret.postgres.data.dsn]
         }
 
         prometheus.scrape "self" {
-        	targets    = prometheus.exporter.self.local.targets
-        	forward_to = [prometheus.relabel.tagged.receiver]
+            targets    = prometheus.exporter.self.local.targets
+            forward_to = [prometheus.relabel.tagged.receiver]
         }
 
         prometheus.scrape "node" {
-        	targets    = prometheus.exporter.unix.local.targets
-        	forward_to = [prometheus.relabel.tagged.receiver]
+            targets    = prometheus.exporter.unix.local.targets
+            forward_to = [prometheus.relabel.tagged.receiver]
         }
 
         prometheus.scrape "cadvisor" {
-        	targets           = [{"__address__" = "kubernetes.default.svc:443", "instance" = sys.env("HOSTNAME")}]
-        	scheme            = "https"
-        	metrics_path      = "/api/v1/nodes/" + sys.env("HOSTNAME") + "/proxy/metrics/cadvisor"
-        	bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-        	honor_labels      = true
-        	forward_to        = [prometheus.relabel.tagged.receiver]
+            targets           = [{"__address__" = "kubernetes.default.svc:443", "instance" = sys.env("HOSTNAME")}]
+            scheme            = "https"
+            metrics_path      = "/api/v1/nodes/" + sys.env("HOSTNAME") + "/proxy/metrics/cadvisor"
+            bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+            honor_labels      = true
+            forward_to        = [prometheus.relabel.tagged.receiver]
 
-        	tls_config {
-        		ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-        	}
+            tls_config {
+                ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+            }
         }
 
         discovery.relabel "pod_metrics" {
-        	targets = discovery.relabel.pods.output
+            targets = discovery.relabel.pods.output
 
-        	rule {
-        		source_labels = ["__meta_kubernetes_pod_container_port_name"]
-        		regex         = "metrics|http-metrics|http-grafana|prometheus|envoy-metrics|hubble-metrics"
-        		action        = "keep"
-        	}
+            rule {
+                source_labels = ["__meta_kubernetes_pod_container_port_name"]
+                regex         = "metrics|http-metrics|http-grafana|prometheus|envoy-metrics|hubble-metrics"
+                action        = "keep"
+            }
 
-        	rule {
-        		source_labels = ["__meta_kubernetes_pod_phase"]
-        		regex         = "Running"
-        		action        = "keep"
-        	}
+            rule {
+                source_labels = ["__meta_kubernetes_pod_phase"]
+                regex         = "Running"
+                action        = "keep"
+            }
         }
 
         prometheus.scrape "pods" {
-        	targets    = discovery.relabel.pod_metrics.output
-        	forward_to = [prometheus.relabel.tagged.receiver]
+            targets    = discovery.relabel.pod_metrics.output
+            forward_to = [prometheus.relabel.tagged.receiver]
         }
 
         prometheus.scrape "postgres" {
-        	targets    = prometheus.exporter.postgres.dragonfly.targets
-        	forward_to = [prometheus.relabel.tagged.receiver]
+            targets    = prometheus.exporter.postgres.dragonfly.targets
+            forward_to = [prometheus.relabel.tagged.receiver]
         }
 
         prometheus.scrape "postgres_do" {
-        	targets    = [{"__address__" = nonsensitive(remote.kubernetes.secret.postgres.data.metrics_url)}]
-        	forward_to = [prometheus.relabel.tagged.receiver]
+            targets    = [{"__address__" = nonsensitive(remote.kubernetes.secret.postgres.data.metrics_url)}]
+            forward_to = [prometheus.relabel.tagged.receiver]
 
-        	basic_auth {
-        		username = nonsensitive(remote.kubernetes.secret.postgres.data.metrics_username)
-        		password = remote.kubernetes.secret.postgres.data.metrics_password
-        	}
+            basic_auth {
+                username = nonsensitive(remote.kubernetes.secret.postgres.data.metrics_username)
+                password = remote.kubernetes.secret.postgres.data.metrics_password
+            }
         }
 
         prometheus.relabel "tagged" {
-        	rule {
-        		source_labels = ["__address__"]
-        		regex         = ".*"
-        		replacement   = "prod"
-        		target_label  = "cluster"
-        	}
+            rule {
+                source_labels = ["__address__"]
+                regex         = ".*"
+                replacement   = "prod"
+                target_label  = "cluster"
+            }
 
-        	forward_to = [prometheus.remote_write.o11y.receiver]
+            forward_to = [prometheus.remote_write.o11y.receiver]
         }
 
         prometheus.remote_write "o11y" {
-        	endpoint {
-        		url = "http://prom.vipyrsec.com:30080/api/v1/write"
-        	}
+            endpoint {
+                url = "http://prom.vipyrsec.com:30080/api/v1/write"
+            }
         }
