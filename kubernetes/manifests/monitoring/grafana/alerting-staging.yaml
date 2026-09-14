@@ -20,9 +20,54 @@ data:
             settings:
               url: $GF_ALERTING_DISCORD_WEBHOOK_URL
               use_discord_username: false
+              title: 'VIPYR — STAGING — {{ .Status | toUpper }}'
               message: |
-                **VIPYR GRAFANA ALERT — STAGING**
-                {{ template "default.message" . }}
+                {{- $body := "" -}}
+                {{- $omitted := false -}}
+                {{- range .Alerts -}}
+                  {{- $reason := index .Annotations "grafana_state_reason" -}}
+                  {{- $summary := or .Annotations.summary .Labels.alertname "Monitoring alert" -}}
+                  {{- if and (eq .Status "resolved") (not $reason) .Annotations.resolved_summary -}}
+                    {{- $summary = .Annotations.resolved_summary -}}
+                  {{- end -}}
+                  {{- $entry := printf "**%s — %.120s**\n" (toUpper .Status) $summary -}}
+                  {{- $entry = printf "%s%s · %.60s" $entry
+                      (toUpper .Labels.environment) (or .Labels.service "monitoring") -}}
+                  {{- with .Labels.severity }}{{ $entry = printf "%s · %.20s" $entry . }}{{ end -}}
+                  {{- with .Labels.instance }}{{ $entry = printf "%s · %.100s" $entry . }}{{ end -}}
+                  {{- $entry = printf "%s\n" $entry -}}
+                  {{- if $reason -}}
+                    {{- $entry = printf "%sState reason: %.100s. Verify the alert before assuming recovery.\n"
+                        $entry $reason -}}
+                  {{- else -}}
+                    {{- with .Annotations.description -}}
+                      {{- $entry = printf "%sLast evaluation: %.250s\n" $entry . -}}
+                    {{- end -}}
+                  {{- end -}}
+                  {{- if eq .Status "firing" -}}
+                    {{- with .Annotations.threshold }}{{ $entry = printf "%sTrigger: %.150s\n" $entry . }}{{ end -}}
+                    {{- $action := or .Annotations.action
+                        "Inspect the alert query and data source for missing telemetry or errors." -}}
+                    {{- $entry = printf "%sCheck: %.220s\n" $entry $action -}}
+                  {{- end -}}
+                  {{- with .Annotations.Error }}{{ $entry = printf "%sEvaluation error: %.400s\n" $entry . }}{{ end -}}
+                  {{- $entry = printf "%sStarted: %s" $entry (.StartsAt.UTC.Format "2006-01-02 15:04 UTC") -}}
+                  {{- if eq .Status "resolved" -}}
+                    {{- $entry = printf "%s · Ended: %s" $entry (.EndsAt.UTC.Format "2006-01-02 15:04 UTC") -}}
+                  {{- end -}}
+                  {{- with .GeneratorURL }}{{ $entry = printf "%s\n[View alert](%s)" $entry . }}{{ end -}}
+                  {{- $candidate := printf "%s%s\n\n" $body $entry -}}
+                  {{- if le (len $candidate) 1750 -}}
+                    {{- $body = $candidate -}}
+                  {{- else -}}
+                    {{- $omitted = true -}}
+                  {{- end -}}
+                {{- end -}}
+                {{ len .Alerts.Firing }} firing · {{ len .Alerts.Resolved }} resolved
+                {{ $body -}}
+                {{- if $omitted -}}
+                Some alerts omitted to fit Discord. [View all alerts](https://grafana.vipyrsec.com/alerting/list)
+                {{- end -}}
 
     groups:
       - orgId: 1
@@ -114,11 +159,18 @@ data:
             execErrState: Alerting
             for: 5m
             annotations:
-              summary: '[STAGING] Dead-lettering is significantly above normal'
+              summary: >-
+                Dead-lettering above normal
+              resolved_summary: >-
+                Dead-letter alert cleared
               description: >-
-                Staging dead-lettered {{ $values.A.Value }} packages in 30
-                minutes versus a rolling seven-day average of
-                {{ $values.B.Value }}.
+                {{ printf "%.1f" $values.A.Value }} dead-lettered packages / 30 min; seven-day average
+                {{ printf "%.1f" $values.B.Value }}.
+              threshold: >-
+                At least 2 packages and more than 3× baseline for 5 min.
+              action: >-
+                Inspect mainframe dead-letter reasons and scanner retries; identify affected packages before
+                replaying.
             labels:
               environment: staging
               service: dragonfly-mainframe
@@ -211,10 +263,18 @@ data:
             execErrState: Alerting
             for: 10m
             annotations:
-              summary: '[STAGING] Package failures are significantly above normal'
+              summary: >-
+                Package failures above normal
+              resolved_summary: >-
+                Package-failure alert cleared
               description: >-
-                Staging failed {{ $values.A.Value }} packages in 15 minutes
-                versus a rolling seven-day average of {{ $values.B.Value }}.
+                {{ printf "%.1f" $values.A.Value }} failed packages / 15 min; seven-day average
+                {{ printf "%.1f" $values.B.Value }}.
+              threshold: >-
+                At least 10 failures and more than 3× baseline for 10 min.
+              action: >-
+                Inspect scanner failure reasons. Separate configured archive limits from scanner crashes or API
+                errors.
             labels:
               environment: staging
               service: dragonfly-mainframe
@@ -321,11 +381,18 @@ data:
             execErrState: Alerting
             for: 10m
             annotations:
-              summary: '[STAGING] Queue pressure is high and continuing to rise'
+              summary: >-
+                Queue pressure high and rising
+              resolved_summary: >-
+                Queue-pressure alert cleared
               description: >-
-                Staging queue depth is {{ $values.A.Value }}, versus a rolling
-                seven-day average of {{ $values.B.Value }} and
-                {{ $values.C.Value }} 30 minutes ago.
+                {{ printf "%.0f" $values.A.Value }} packages queued; seven-day average
+                {{ printf "%.1f" $values.B.Value }}; {{ printf "%.0f" $values.C.Value }} queued 30 min ago.
+              threshold: >-
+                At least 100 queued, more than 3× baseline, and growth of at least 50 over 30 min, sustained for
+                10 min.
+              action: >-
+                Check scanner availability, processing failures, and mainframe queue throughput.
             labels:
               environment: staging
               service: dragonfly-mainframe
@@ -414,11 +481,17 @@ data:
             execErrState: Alerting
             for: 2m
             annotations:
-              summary: '[STAGING] No packages were queued or scanned successfully'
+              summary: >-
+                No package activity
+              resolved_summary: >-
+                Package activity resumed
               description: >-
-                Staging recorded {{ $values.A.Value }} ingested packages and
-                {{ $values.B.Value }} successful scans during the last 10
-                minutes.
+                {{ printf "%.1f" $values.A.Value }} packages ingested and {{ printf "%.1f" $values.B.Value }}
+                successful scans / 10 min.
+              threshold: >-
+                Both ingestion and successful scans below 1 over 10 min, sustained for 2 min.
+              action: >-
+                Check loader runs, mainframe health, scanner connectivity, and upstream package availability.
             labels:
               environment: staging
               service: dragonfly-mainframe
@@ -478,9 +551,17 @@ data:
             execErrState: Alerting
             for: 5m
             annotations:
-              summary: '[STAGING] Node memory headroom below 10%'
-              description: Node {{ $labels.instance }} has less than 10% available memory. Check reclaim
-                pressure and container working sets before increasing concurrency.
+              summary: >-
+                Low node memory headroom
+              resolved_summary: >-
+                Node memory headroom recovered
+              description: >-
+                {{ humanizePercentage $values.A.Value }} memory available on {{ $labels.instance }}.
+              threshold: >-
+                Available memory below 10% for 5 min.
+              action: >-
+                Inspect container working sets, reclaim pressure, and workload placement before increasing
+                concurrency.
             labels:
               environment: staging
               service: kubernetes
@@ -537,9 +618,17 @@ data:
             execErrState: Alerting
             for: 5m
             annotations:
-              summary: '[STAGING] Node memory stalls above 10%'
-              description: Tasks on {{ $labels.instance }} are stalled on memory more than 10% of the
-                time. Inspect file-cache refaults and workload placement.
+              summary: >-
+                High node memory stalls
+              resolved_summary: >-
+                Node memory stalls recovered
+              description: >-
+                {{ humanizePercentage $values.A.Value }} of time stalled on memory on {{ $labels.instance }} (5
+                min rate).
+              threshold: >-
+                Memory stalls above 10% for 5 min.
+              action: >-
+                Inspect file-cache refaults, container working sets, and workload placement.
             labels:
               environment: staging
               service: kubernetes
@@ -596,9 +685,17 @@ data:
             execErrState: Alerting
             for: 5m
             annotations:
-              summary: '[STAGING] Node metrics missing'
-              description: Expected healthy node telemetry from all three workers. Missing series must not
-                be interpreted as zero usage. Update the expected count when the node pool size changes.
+              summary: >-
+                Node metrics missing
+              resolved_summary: >-
+                Node metrics restored
+              description: >-
+                {{ printf "%.0f" $values.A.Value }}/3 workers reporting healthy node metrics.
+              threshold: >-
+                Fewer than 3 healthy node telemetry targets for 5 min.
+              action: >-
+                Check Alloy pods, node readiness, and the integrations/unix scrape targets. Missing metrics do not
+                mean zero usage.
             labels:
               environment: staging
               service: kubernetes
@@ -655,9 +752,17 @@ data:
             execErrState: Alerting
             for: 5m
             annotations:
-              summary: '[STAGING] Container metrics missing'
-              description: Expected kubelet cAdvisor metrics from all three workers. Check Alloy, kubelet proxy
-                authorization, and node availability. Update the expected count when the pool size changes.
+              summary: >-
+                Container metrics missing
+              resolved_summary: >-
+                Container metrics restored
+              description: >-
+                {{ printf "%.0f" $values.A.Value }}/3 workers reporting healthy container metrics.
+              threshold: >-
+                Fewer than 3 healthy cAdvisor telemetry targets for 5 min.
+              action: >-
+                Check Alloy pods, kubelet proxy authorization, and prometheus.scrape.cadvisor targets. Missing
+                metrics do not mean zero usage.
             labels:
               environment: staging
               service: kubernetes
