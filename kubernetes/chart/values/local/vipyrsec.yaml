@@ -15,6 +15,11 @@ alloy:
 
         discovery.kubernetes "pods" {
         	role = "pod"
+
+        	selectors {
+        		role  = "pod"
+        		field = "spec.nodeName=" + sys.env("HOSTNAME")
+        	}
         }
 
         discovery.relabel "pods" {
@@ -70,8 +75,6 @@ alloy:
 
         prometheus.exporter.unix "local" { }
 
-        prometheus.exporter.cadvisor "local" { }
-
         prometheus.scrape "self" {
         	targets    = prometheus.exporter.self.local.targets
         	forward_to = [prometheus.relabel.tagged.receiver]
@@ -83,12 +86,36 @@ alloy:
         }
 
         prometheus.scrape "cadvisor" {
-        	targets    = prometheus.exporter.cadvisor.local.targets
-        	forward_to = [prometheus.relabel.tagged.receiver]
+        	targets           = [{"__address__" = "kubernetes.default.svc:443", "instance" = sys.env("HOSTNAME")}]
+        	scheme            = "https"
+        	metrics_path      = "/api/v1/nodes/" + sys.env("HOSTNAME") + "/proxy/metrics/cadvisor"
+        	bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+        	honor_labels      = true
+        	forward_to        = [prometheus.relabel.tagged.receiver]
+
+        	tls_config {
+        		ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+        	}
+        }
+
+        discovery.relabel "pod_metrics" {
+        	targets = discovery.relabel.pods.output
+
+        	rule {
+        		source_labels = ["__meta_kubernetes_pod_container_port_name"]
+        		regex         = "metrics|http-metrics|http-grafana|prometheus|envoy-metrics|hubble-metrics"
+        		action        = "keep"
+        	}
+
+        	rule {
+        		source_labels = ["__meta_kubernetes_pod_phase"]
+        		regex         = "Running"
+        		action        = "keep"
+        	}
         }
 
         prometheus.scrape "pods" {
-        	targets    = discovery.relabel.pods.output
+        	targets    = discovery.relabel.pod_metrics.output
         	forward_to = [prometheus.relabel.tagged.receiver]
         }
 
