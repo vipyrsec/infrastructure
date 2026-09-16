@@ -27,8 +27,8 @@ DRAGONFLY_REUSE_CACHE_BYTES=33554432
 
 The full staging rollout uses `reuse` to skip candidates, with every hundredth
 hit rescanned. `observe` remains available for a controlled rescan baseline.
-A result mismatch disables reuse in that process and rejects the active job
-rather than publishing suspect cached results. Reuse requires
+A result mismatch disables reuse in that process and rejects jobs that consumed
+cached output. Fully fresh observation results are preserved. Reuse requires
 `DRAGONFLY_THREADS=1`, as already configured on both staging workers. Record
 both deployment IDs, image digests, observation windows and workload mix.
 OpenGrep is alert-gated, so idle periods do not establish a performance result.
@@ -95,3 +95,12 @@ workload and separate resource/cost measurements. Do not infer them from hit rat
 
 - YARA: `sha256:071b877e02d1344d96b1603027eb038fa5f2e203c60103ddd669ee8939baec02`
 - OpenGrep: `sha256:996a3e7239f39d383ed8ec5defc9e3b225c3ef03c9677ef55c1aeb2674c04a38`
+
+## Restart limitation
+
+This experiment measures reuse within each worker lifetime. Worker crashes,
+restarts and deployments discard all cached history; replicas do not share it.
+Frequent worker restarts can therefore reduce the measured benefit materially.
+The user explicitly accepted this limitation for the initial staging experiment.
+Persistent shared reuse remains a separate follow-up design, not an implemented
+capability. Review restart frequency alongside hit rate before judging results.
