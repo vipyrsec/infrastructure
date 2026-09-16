@@ -106,3 +106,60 @@ the old bounded process-local mode. No package rescan or data backfill is requir
 Schema rollback, if desired after disabling callers: downgrade to `a71dc40e9b82`.
 It drops only `scan_cache_entries` and `scan_cache_namespaces`. Stop the new image
 from automatically upgrading the schema again before a deliberate downgrade.
+
+## Rollout audit — 2026-09-16
+
+Merged Mainframe #428, YARA #219, OpenGrep #11 and infrastructure #198 after
+passing CI and Greptile review (5/5 on all three application PRs). Local tests:
+296 Mainframe tests with 100% coverage, 47 YARA tests and 39 OpenGrep tests.
+Full repository hooks passed. Review regressions cover malformed replies and
+complete encoded HTTP write sizes, including JSON escaping.
+
+Mainframe became ready on staging at approximately 23:15 UTC. Applied the staging
+cache ConfigMap and added its optional env reference while preserving existing
+configuration references. Updated only the mainframe container image. Startup
+applied revision `4d6a1c8f902b`; both cache tables and the enabled flag were verified.
+The cache initially occupied 24,576 bytes. The database reported seven connections
+and zero deadlocks before worker activation.
+
+- Mainframe commit: `50446982e68ec484de93484e073993177fb2d304`
+- Mainframe image digest: `sha256:e1049b351d616949bd69ecaac4e2690b2e2c3f80e69a929ce37bc47170e1023a`
+- YARA commit: `c49653df8285450062c475bd6c826450b92c8de5`
+- YARA image digest: `sha256:99eb2999f429114ba8500005042029a130461d048d918fad74745dc702f84db5`
+- OpenGrep commit: `d7d8d75389995013a019846528cd218619fda7e4`
+- OpenGrep image digest: `sha256:90a0946ed6d813a87e67013ae9f8abe1fb513868002ca4b2920425904b5f7315`
+
+Patched only `grafana-dashboard-rule-performance` on the observability cluster.
+Verified all 23 existing panels were unchanged; the new row and six panels bring
+the total to 30. New panels explicitly select staging. Prometheus scrapes the
+new cache storage and per-scanner entry gauges.
+
+App Platform deployment `5d4ac0a7-dcab-4a67-9492-3fe4151c2c6d` became active at
+23:22:17 UTC in staging app `9d243898-5b30-4ab8-a432-df4b22bd356a`. Changed only
+the two worker image digests and added `DRAGONFLY_REUSE_CACHE_DATABASE=true`.
+Preserved sizes, instance counts, one-thread setting, reuse mode, and all other
+App settings. No credentials were changed or committed.
+
+By 23:24 UTC, YARA had persisted 2,589 file results (153,817 payload bytes;
+851,968 physical bytes). Successful accepted results reported durable hits with
+zero cache errors or mismatches. Early histogram p95 was approximately 24 ms for
+lookups and 49 ms for writes; these small-sample server-operation observations
+exclude network time and are not long-term performance conclusions.
+
+Requested a staging-only YARA restart at 23:24:04 UTC to check persistence:
+deployment `e74ee666-3cf7-4ab8-a257-0aafa8f554c1`.
+
+The restarted YARA process reused two persisted entries while successfully
+scanning `ocrmypdf 17.12.1` at 23:24:24 UTC, with zero cache errors or mismatches.
+Its namespace fingerprint stayed unchanged and existing rows survived; subsequent
+writes increased the total to 3,022 entries (974,848 physical bytes). Database
+connections remained seven, with zero deadlocks. The observed dead-letter counter
+did not increase during this initial rollout window.
+
+OpenGrep was healthy and polling an empty eligible queue during initial validation.
+Its database configuration is deployed, but no live durable hit was observed yet;
+local integration tests cover persistence and restart behavior for both clients.
+
+Production Mainframe's image and App Platform's active deployment, worker digests,
+and instance counts exactly matched their pre-rollout snapshots. No production
+resources or credentials were changed.
