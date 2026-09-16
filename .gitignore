@@ -6,3 +6,8 @@ kubernetes/chart/charts/*.tgz
 
 # Generated kube configs
 *.config
+
+# Python validation artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
