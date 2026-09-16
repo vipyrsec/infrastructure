@@ -48,3 +48,20 @@ start), zero cache errors and zero mismatches. The pre-existing within-package
 676 reused files are deliberately excluded from the new cross-job savings.
 OpenGrep started successfully and initially reported no available shadow jobs;
 its zero reports at that point do not establish end-to-end result validation.
+
+At 03:11 UTC, Prometheus had accepted 9 YARA reports and 1 OpenGrep report.
+YARA recorded 2032 lookups, 14 cross-job skips (1725 bytes), 2018 engine inputs,
+and 2011 evictions. Both scanners had zero cache errors or mismatches; no audit
+sample had yet occurred. These cold-start counts are not an improvement claim.
+The eviction count makes the 32 MiB budget an important part of the evaluation.
+
+OpenGrep's first package (`psi-agent` 0.0.1a20260916) failed because the engine
+reported syntax errors. This follows the pre-existing scan-error classification;
+the worker remained running, its failure telemetry was accepted, and no results
+from that failed scan entered the cache. Successful OpenGrep reuse still needs
+eligible workload during the observation period.
+
+Production verification: the App deployment remains
+`01cc4cbc-2927-4c7a-a2b4-b5876073463d`; its worker image/count snapshot is identical
+before and after rollout. Production Mainframe remains on the pre-experiment
+`d84b4e0` image listed above.
