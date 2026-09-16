@@ -27,7 +27,9 @@ DRAGONFLY_REUSE_CACHE_BYTES=33554432
 
 The full staging rollout uses `reuse` to skip candidates, with every hundredth
 hit rescanned. `observe` remains available for a controlled rescan baseline.
-A result mismatch disables reuse in that process and emits an error. Record
+A result mismatch disables reuse in that process and rejects the active job
+rather than publishing suspect cached results. Reuse requires
+`DRAGONFLY_THREADS=1`, as already configured on both staging workers. Record
 both deployment IDs, image digests, observation windows and workload mix.
 OpenGrep is alert-gated, so idle periods do not establish a performance result.
 
