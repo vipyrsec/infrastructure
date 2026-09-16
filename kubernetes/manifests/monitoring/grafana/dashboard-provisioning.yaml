@@ -1431,6 +1431,555 @@ data:
           ],
           "title": "Performance Snapshot Health",
           "type": "timeseries"
+        },
+        {
+          "id": 11,
+          "type": "row",
+          "title": "Staging scanner reuse experiment",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 22
+          },
+          "panels": []
+        },
+        {
+          "id": 12,
+          "type": "stat",
+          "title": "Engine inputs skipped",
+          "description": "Staging only, over the selected time range. Based on accepted worker results. These are measured engine inputs and wall times, not estimated CPU or billing savings.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 23
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "sum by (scanner, mode) (increase(scanner_reuse_reused_files_total{cluster=\"staging\"}[$__range]))",
+              "legendFormat": "{{scanner}} / {{mode}}",
+              "instant": true
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "type": "stat",
+          "title": "Engine input bytes skipped",
+          "description": "Staging only, over the selected time range. Based on accepted worker results. These are measured engine inputs and wall times, not estimated CPU or billing savings.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 23
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "sum by (scanner, mode) (increase(scanner_reuse_reused_bytes_total{cluster=\"staging\"}[$__range]))",
+              "legendFormat": "{{scanner}} / {{mode}}",
+              "instant": true
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "type": "stat",
+          "title": "Validation rescans",
+          "description": "Staging only, over the selected time range. Based on accepted worker results. These are measured engine inputs and wall times, not estimated CPU or billing savings.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 23
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "sum by (scanner, mode) (increase(scanner_reuse_validated_files_total{cluster=\"staging\"}[$__range]))",
+              "legendFormat": "{{scanner}} / {{mode}}",
+              "instant": true
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "type": "stat",
+          "title": "Result mismatches",
+          "description": "Staging only, over the selected time range. Based on accepted worker results. These are measured engine inputs and wall times, not estimated CPU or billing savings.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 23
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "sum by (scanner, mode) (increase(scanner_reuse_mismatched_files_total{cluster=\"staging\"}[$__range]))",
+              "legendFormat": "{{scanner}} / {{mode}}",
+              "instant": true
+            }
+          ]
+        },
+        {
+          "id": 16,
+          "type": "stat",
+          "title": "Cache overhead wall time",
+          "description": "Staging only, over the selected time range. Based on accepted worker results. These are measured engine inputs and wall times, not estimated CPU or billing savings.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 28
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 2
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "sum by (scanner, mode) (increase(scanner_reuse_overhead_seconds_total{cluster=\"staging\"}[$__range]))",
+              "legendFormat": "{{scanner}} / {{mode}}",
+              "instant": true
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "type": "stat",
+          "title": "Engine wall time",
+          "description": "Staging only, over the selected time range. Based on accepted worker results. These are measured engine inputs and wall times, not estimated CPU or billing savings.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 28
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 2
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "sum by (scanner, mode) (increase(scanner_reuse_engine_seconds_total{cluster=\"staging\"}[$__range]))",
+              "legendFormat": "{{scanner}} / {{mode}}",
+              "instant": true
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "type": "stat",
+          "title": "Accepted telemetry reports",
+          "description": "Staging only, over the selected time range. Based on accepted worker results. These are measured engine inputs and wall times, not estimated CPU or billing savings.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 28
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "sum by (scanner, mode) (increase(scanner_reuse_reports_total{cluster=\"staging\"}[$__range]))",
+              "legendFormat": "{{scanner}} / {{mode}}",
+              "instant": true
+            }
+          ]
+        },
+        {
+          "id": 19,
+          "type": "stat",
+          "title": "Cache errors",
+          "description": "Staging only, over the selected time range. Based on accepted worker results. These are measured engine inputs and wall times, not estimated CPU or billing savings.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 28
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "sum by (scanner, mode) (increase(scanner_reuse_errors_total{cluster=\"staging\"}[$__range]))",
+              "legendFormat": "{{scanner}} / {{mode}}",
+              "instant": true
+            }
+          ]
+        },
+        {
+          "id": 20,
+          "type": "timeseries",
+          "title": "Avoided engine inputs (%)",
+          "description": "Staging only. Compare like workloads and rules; a quiet alert-gated OpenGrep queue may have no recent samples. Counter resets are handled by Prometheus rate/increase.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 33
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "100 * sum by (scanner) (rate(scanner_reuse_reused_files_total{cluster=\"staging\",mode=\"reuse\"}[$__rate_interval])) / clamp_min(sum by (scanner) (rate(scanner_reuse_reused_files_total{cluster=\"staging\",mode=\"reuse\"}[$__rate_interval]) + rate(scanner_reuse_engine_files_total{cluster=\"staging\",mode=\"reuse\"}[$__rate_interval])), 1e-9)",
+              "legendFormat": "{{scanner}} / {{mode}}"
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "type": "timeseries",
+          "title": "Average engine wall time per reported job",
+          "description": "Staging only. Compare like workloads and rules; a quiet alert-gated OpenGrep queue may have no recent samples. Counter resets are handled by Prometheus rate/increase.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 33
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "sum by (scanner, mode) (rate(scanner_reuse_engine_seconds_total{cluster=\"staging\"}[$__rate_interval])) / clamp_min(sum by (scanner, mode) (rate(scanner_reuse_reports_total{cluster=\"staging\"}[$__rate_interval])), 1e-9)",
+              "legendFormat": "{{scanner}} / {{mode}}"
+            }
+          ]
+        },
+        {
+          "id": 22,
+          "type": "timeseries",
+          "title": "FIFO evictions per second",
+          "description": "Staging only. Compare like workloads and rules; a quiet alert-gated OpenGrep queue may have no recent samples. Counter resets are handled by Prometheus rate/increase.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 41
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ops",
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "sum by (scanner, mode) (rate(scanner_reuse_evicted_files_total{cluster=\"staging\"}[$__rate_interval]))",
+              "legendFormat": "{{scanner}} / {{mode}}"
+            }
+          ]
+        },
+        {
+          "id": 23,
+          "type": "timeseries",
+          "title": "Time since latest reuse telemetry",
+          "description": "Staging only. Compare like workloads and rules; a quiet alert-gated OpenGrep queue may have no recent samples. Counter resets are handled by Prometheus rate/increase.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 41
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "time() - max by (scanner) (scanner_reuse_last_report_timestamp_seconds{cluster=\"staging\",mode=\"reuse\"} > 0)",
+              "legendFormat": "{{scanner}} / {{mode}}"
+            }
+          ]
         }
       ],
       "refresh": "30s",
@@ -1497,6 +2046,6 @@ data:
       "timezone": "browser",
       "title": "Dragonfly Rule Performance",
       "uid": "dragonfly-rule-performance",
-      "version": 1,
+      "version": 2,
       "weekStart": ""
     }
