@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: dragonfly-mainframe-scan-cache
+  namespace: dragonfly
+
+data:
+  SCAN_CACHE_ENABLED: 'true'
+  SCAN_CACHE_MAX_ENTRIES: '500000'
+  SCAN_CACHE_MAX_BYTES: '67108864'
+  SCAN_CACHE_MAX_DISK_BYTES: '536870912'
+  SCAN_CACHE_TTL_SECONDS: '86400'

@@ -1980,6 +1980,289 @@ data:
               "legendFormat": "{{scanner}} / {{mode}}"
             }
           ]
+        },
+        {
+          "id": 24,
+          "type": "row",
+          "title": "Staging database scan cache",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 49,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Staging-only durable cache. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 50,
+            "w": 12,
+            "h": 8
+          },
+          "id": 25,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "max(scanner_cache_storage_bytes{cluster=\"staging\"})",
+              "legendFormat": "{{scanner}} {{operation}} {{outcome}} {{__name__}}"
+            }
+          ],
+          "title": "Durable cache storage including indexes",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Staging-only durable cache. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 50,
+            "w": 12,
+            "h": 8
+          },
+          "id": 26,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by(scanner)(scanner_cache_entries{cluster=\"staging\"})",
+              "legendFormat": "{{scanner}} {{operation}} {{outcome}} {{__name__}}"
+            }
+          ],
+          "title": "Durable cache entries by scanner",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Staging-only durable cache. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 58,
+            "w": 12,
+            "h": 8
+          },
+          "id": 27,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "histogram_quantile(0.95, sum by(le,operation)(rate(scanner_cache_request_seconds_bucket{cluster=\"staging\"}[$__rate_interval])))",
+              "legendFormat": "{{scanner}} {{operation}} {{outcome}} {{__name__}}"
+            }
+          ],
+          "title": "Cache operation p95 latency",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Staging-only durable cache. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 58,
+            "w": 12,
+            "h": 8
+          },
+          "id": 28,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by(operation,outcome)(rate(scanner_cache_requests_total{cluster=\"staging\"}[$__rate_interval]))",
+              "legendFormat": "{{scanner}} {{operation}} {{outcome}} {{__name__}}"
+            }
+          ],
+          "title": "Cache operations and bypasses",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Staging-only durable cache. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 66,
+            "w": 12,
+            "h": 8
+          },
+          "id": 29,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by(__name__,scanner)({__name__=~\"scanner_cache_(rows_inserted|admission_skips)_total\",cluster=\"staging\"})",
+              "legendFormat": "{{scanner}} {{operation}} {{outcome}} {{__name__}}"
+            }
+          ],
+          "title": "Durable cache inserts and admission skips",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Staging-only durable cache. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 66,
+            "w": 12,
+            "h": 8
+          },
+          "id": 30,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by(scanner)(scanner_cache_payload_bytes{cluster=\"staging\"})",
+              "legendFormat": "{{scanner}} {{operation}} {{outcome}} {{__name__}}"
+            }
+          ],
+          "title": "Durable cache result payload by scanner",
+          "type": "timeseries"
         }
       ],
       "refresh": "30s",
@@ -2046,6 +2329,6 @@ data:
       "timezone": "browser",
       "title": "Dragonfly Rule Performance",
       "uid": "dragonfly-rule-performance",
-      "version": 2,
+      "version": 3,
       "weekStart": ""
     }

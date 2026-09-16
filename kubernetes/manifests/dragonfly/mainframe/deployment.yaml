@@ -37,6 +37,9 @@ spec:
             - configMapRef:
                 name: dragonfly-mainframe-opengrep-shadow
                 optional: true
+            - configMapRef:
+                name: dragonfly-mainframe-scan-cache
+                optional: true
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
