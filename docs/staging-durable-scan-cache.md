@@ -50,8 +50,9 @@ Failed, partial, unscanned and package-context-dependent inputs are not admitted
   stop. This is an admission safeguard, not a PostgreSQL tablespace disk quota.
 - Fixed 24-hour expiry, not extended on hits. Cleanup runs every minute and removes
   at most 1,000 expired rows per scanner/tick. It never cleans canonical findings.
-  Table-specific autovacuum settings encourage reuse of space. Empty obsolete-rule
-  namespaces are removed; active-rule revocation records remain.
+  Table-specific autovacuum settings encourage reuse of space. Empty unrevoked or
+  obsolete-rule namespaces are removed; active-rule
+  revocation records remain.
 - Workers stop cache requests for the job after a transport failure. Each request
   has a 750 ms timeout and new requests stop after two seconds of accumulated
   network time per job. Normal scanning continues when caching is unavailable.
@@ -73,7 +74,8 @@ The staging database was approximately 6.9 GB before rollout, including about
 A disposable local PostgreSQL 16 benchmark loaded 500,000 clean cache entries
 and 100,000 canonical scans. Cache table plus indexes occupied 120,299,520 bytes
 (about 115 MiB). A 128-hit storage-layer lookup had median 4.56 ms, p95 5.18 ms.
-The sampled SQL used the primary-key index and executed in 0.41 ms. Concurrent
+The exact tuple-key/expiry SQL used primary-key bitmap scans and executed in
+1.92 ms, with 2.23 ms planning time. Concurrent
 unthrottled cache load changed canonical point-lookup p95 from 0.62 to 1.27 ms.
 These are local warm-cache measurements, not staging latency guarantees or a
 claim of zero database impact. Observe live request latency, quota skips, physical
