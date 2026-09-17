@@ -23,11 +23,19 @@ Mainframe also rejects a context that differs from its currently loaded rules.
 The database is authoritative: database mode bypasses the process-local cache.
 Each job prefetches bounded batches and retains only bounded response data.
 Restarts discard this temporary data but the next worker can read persisted rows.
-Every hundredth candidate is rescanned. A mismatch disables local reuse and
-requests durable namespace revocation, so future lookups across workers cannot
-use that generation. Revocation failures are explicitly logged. Jobs that consumed
-suspect cached output are rejected. Only the current authenticated worker lease
-can publish results or revoke a namespace.
+Every hundredth candidate is rescanned. YARA sorts rule sources before compilation
+and canonicalizes results before comparison. An actual YARA finding mismatch
+quarantines only the affected file hash/language, retaining evidence and quota
+accounting until normal expiry. Lookups exclude quarantined entries; ordinary
+writes cannot replace them. Failed quarantine requests remain blocked locally
+and retry before subsequent job lookups. Local quarantine tracking is capped at
+4,096 keys; reaching that limit disables only that process's reuse. Diagnostics
+include file hash/path, result counts and at most 16 cached/fresh matches.
+
+OpenGrep still requests generation revocation on a sampled mismatch. Server-side
+generation revocation remains available for broader incidents. Jobs that already
+consumed suspect cached output are rejected. Only the current authenticated worker
+lease can publish results, quarantine files, or revoke a namespace.
 
 OpenGrep retains its conservative rule eligibility and complete-coverage checks.
 Failed, partial, unscanned and package-context-dependent inputs are not admitted.
@@ -61,7 +69,7 @@ Storage and latency metrics: `scanner_cache_storage_bytes`,
 `scanner_cache_entries`, `scanner_cache_payload_bytes`,
 `scanner_cache_request_seconds`, `scanner_cache_requests_total`,
 `scanner_cache_rows_inserted_total`, `scanner_cache_rows_expired_total`, and
-`scanner_cache_admission_skips_total`. Existing accepted-result reuse metrics
+`scanner_cache_admission_skips_total`, and `scanner_cache_quarantined_total`. Existing accepted-result reuse metrics
 continue to count actual avoided engine inputs; select a window after rollout to
 separate this experiment from the previous in-memory cache. Worker `inserted_files`
 is a local-cache metric; use server insertion metrics for durable admissions.
@@ -163,3 +171,73 @@ local integration tests cover persistence and restart behavior for both clients.
 Production Mainframe's image and App Platform's active deployment, worker digests,
 and instance counts exactly matched their pre-rollout snapshots. No production
 resources or credentials were changed.
+
+## YARA validation correction — 2026-09-17 UTC
+
+YARA revoked its namespace at 00:10:54 UTC while scanning `aioli-cli 0.1.19`.
+The cache rows were retained. Investigation compared 105 cached file paths from
+that package with six fresh scans using the identical rule corpus. Finding order
+varied, but no rule, score or filename-filter differences were found. Rule sources
+were compiled from an unordered map and cached/fresh vectors were compared in
+order. The worker had previously exited at 23:48:58 UTC while scanning
+`griptape-nodes-editor-dist 0.126.0` (exit 128; OOM not established).
+
+Mainframe #429 adds per-file quarantine and YARA #220 fixes deterministic
+compilation, semantic comparison, isolation and diagnostics. No dependencies were
+added. Validation: 300 Mainframe tests with 100% coverage, strict ty/Pyright,
+51 YARA tests and complete hook suites. PostgreSQL migration
+`6e2b9a140fd3` adds a default-false quarantine column with a two-second DDL lock
+timeout. Upgrade/downgrade/re-upgrade preserves canonical data. On downgrade,
+only generations containing quarantined rows are revoked before dropping the
+column, preventing the older schema from reusing known-suspect entries.
+
+The corrected YARA executable has a new engine fingerprint and warms a new
+namespace. The old revoked generation is retained until normal expiry; it is
+not re-enabled or copied across engine fingerprints. OpenGrep's image and
+configuration are outside this recovery rollout.
+
+Recovery image for Mainframe:
+`ghcr.io/vipyrsec/dragonfly-mainframe:sha-85cf8a1a1de157e85d98070bd292beb3cadbef48@sha256:ab8bf919af3d336031da99fc6d9f365810ca4fd9107501ee1d01b9e78c5aa5a8`.
+Applied only the staging mainframe container image; configuration references and
+production resources were preserved.
+
+YARA recovery commit: `d10aa6225e24a87d263a92f7ddcc6cc832315c7b`.
+Both application PRs passed all CI and received Greptile 5/5. Review also verified
+that quarantine acknowledgements are atomic (the counter reports newly changed
+rows, not partial acceptance), and prompted a regression ensuring unrelated
+pending cache writes survive quarantine.
+
+Staging Mainframe readiness and revision `6e2b9a140fd3` were confirmed. The old
+34,442-row YARA generation remained intact and revoked; OpenGrep's active cache
+continued to grow. Database connections were six with zero deadlocks at that check.
+
+YARA recovery image digest:
+`sha256:f4bfb79068a632e076c5773e27417561cfddc9019bd636dff79e143ce9a22832`.
+Changed only the staging App Platform `scanner` image digest; database caching,
+reuse mode, one thread, worker resources and the OpenGrep worker were preserved.
+
+Recovery App deployment `8f8cbf67-5ea4-4d49-a444-f5922a384916` became active at
+00:56:08 UTC. Confirmed the active YARA digest and unchanged OpenGrep digest.
+After that confirmation, requeued only the failed `aioli-cli 0.1.19` scan
+(`3c5cbb60-3c97-4d79-9dd7-56ef495985a7`). A bounded, row-locked transaction verified
+the exact cache-validation failure, attempt 1, and absence of dead-letter status
+before changing FAILED to QUEUED and clearing the obsolete assignment and failure
+reason. Preserved attempt count and existing package/rule data. This allows the
+normal worker lease and result path to perform the retry.
+
+The retry completed successfully at 00:57:07 UTC on attempt 2: score 60, three
+matched rules, two durable cache hits, zero cache errors and zero mismatches.
+Database status is FINISHED and the obsolete failure reason is cleared. The scan
+completed in approximately 1.1 seconds. The new active YARA namespace is
+`a99557ac623e0da2dafb54db4017af7d6bdf1d826d18b490e1830f0d289bbcf9`; initial
+verification found 2,034 entries while the old revoked namespace remained intact.
+
+Requested a staging-only YARA restart at 00:58:36 UTC. Deployment
+`2888e3af-6fd0-4da3-9cbd-da984f796012` became active at 00:59:02 UTC. New worker
+logs showed durable hits for `analog-sdk 0.20.0` (two files) and `ctrl-kd 4.9.0`
+(three files), with zero mismatches. The active namespace fingerprint stayed the
+same and persisted rows survived. One busy cache admission fell back to a fresh
+scan; it did not revoke the namespace or prevent job completion.
+
+Production Mainframe and scanner App deployment/digests/instance counts exactly
+matched their pre-recovery snapshots. No production deployment was performed.
