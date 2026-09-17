@@ -48,15 +48,21 @@ Failed, partial, unscanned and package-context-dependent inputs are not admitted
   Excess requests bypass caching. Staging Mainframe has one process/replica.
 - At most 128 keys/results per request, 16 KiB/result, 512 KiB result bytes/write.
 - Primary-key batch lookup; no per-file requests and no table-wide counts.
-- Immutable rows with `ON CONFLICT DO NOTHING`; hits do not update timestamps,
-  usage counters, TTLs, or result rows. Quota counters update once per write batch.
+- Immutable result payloads with `ON CONFLICT DO NOTHING`. Hits renew expiry in
+  one bounded update per lookup batch, only after at least an hour since insertion
+  or renewal. Repeated hits within that hour issue no update. Quota counters
+  update once per insertion batch; renewals do not alter quota accounting.
 - Nonblocking per-scanner writer lock; 200 ms statement and 25 ms lock timeouts.
-- Initial cap per scanner: 500,000 live rows and 64 MiB serialized result bytes,
+- Staging cap per scanner: 1,000,000 live rows and 64 MiB serialized result bytes,
   shared across at most eight rule/engine generations.
 - Global physical-size admission threshold: 512 MiB, including indexes and TOAST.
   A batch already admitted can cross the threshold slightly; subsequent writes
   stop. This is an admission safeguard, not a PostgreSQL tablespace disk quota.
-- Fixed 24-hour expiry, not extended on hits. Cleanup runs every minute and removes
+- Hits extend expiry to 24 hours from renewal, with hourly write coalescing
+  (roughly 23–24 hours of retention after the last hit). For TTLs below two hours,
+  the renewal interval is half the TTL. Expired, quarantined, and revoked results
+  cannot renew. Writer contention skips renewal while returning valid hits;
+  database errors retain the normal uncached-scan fallback. Cleanup runs every minute and removes
   at most 1,000 expired rows per scanner/tick. It never cleans canonical findings.
   Table-specific autovacuum settings encourage reuse of space. Empty unrevoked or
   obsolete-rule namespaces are removed; active-rule
@@ -68,7 +74,7 @@ Failed, partial, unscanned and package-context-dependent inputs are not admitted
 Storage and latency metrics: `scanner_cache_storage_bytes`,
 `scanner_cache_entries`, `scanner_cache_payload_bytes`,
 `scanner_cache_request_seconds`, `scanner_cache_requests_total`,
-`scanner_cache_rows_inserted_total`, `scanner_cache_rows_expired_total`, and
+`scanner_cache_rows_inserted_total`, `scanner_cache_rows_renewed_total`, `scanner_cache_rows_expired_total`, and
 `scanner_cache_admission_skips_total`, and `scanner_cache_quarantined_total`. Existing accepted-result reuse metrics
 continue to count actual avoided engine inputs; select a window after rollout to
 separate this experiment from the previous in-memory cache. Worker `inserted_files`
@@ -95,7 +101,8 @@ a canonical scan sentinel survives downgrade unchanged.
 
 ## Staging settings and rollback
 
-Mainframe: `SCAN_CACHE_ENABLED=true`. Defaults supply the budgets above;
+Mainframe: `SCAN_CACHE_ENABLED=true`, `SCAN_CACHE_MAX_ENTRIES=1000000` in the
+staging-only ConfigMap. The application default remains 500,000;
 `SCAN_CACHE_MAX_ENTRIES`, `SCAN_CACHE_MAX_BYTES`, `SCAN_CACHE_MAX_DISK_BYTES`, and
 `SCAN_CACHE_TTL_SECONDS` allow explicit adjustment.
 
@@ -258,3 +265,36 @@ worker settings or credentials were changed during the temporary check.
 Final staging App deployment `3bf6f616-8742-4e75-bfd6-3ee05cfdd9ec` became active at
 01:04:58 UTC. Verified YARA is back in `reuse` mode with the corrected image and
 OpenGrep retains its existing image and reuse configuration.
+
+## Cache renewal and capacity — 2026-09-17
+
+The user authorized cache-hit renewal, the increase to 1 million entries, PRs,
+admin merge bypass if needed, and staging-only rollout. Production is excluded.
+Mainframe renews only valid hits, at most once an hour per entry under the normal
+24-hour TTL. Rules and engine changes still produce separate namespaces; expired
+or invalid entries cannot be revived. The existing expiry column is reused, so
+there is no schema migration or backfill. Both scanners receive the same policy.
+
+Before this change, staging reported 500,000 YARA entries and 35,517 OpenGrep
+entries, using 164,241,408 physical bytes. Roughly 21 hours of accepted reuse
+telemetry showed 438,267 avoided YARA file inputs (27.3%) and 17,366 OpenGrep
+inputs (7.9%), with 4,595 validation comparisons and no mismatches. These are
+avoided inputs, not measured percentage speedups. Capacity-skipped admissions
+are attempts, not a count of distinct reusable files.
+
+Validation: Mainframe's full 308-test suite passed with 100% coverage. Regression
+tests cover both scanners, hourly write suppression, invalid entries, writer
+contention, quota preservation, short TTL, revocation races, and HTTP commit
+visibility. Repository hooks, strict type checks, and pedantic zizmor pass.
+
+A disposable local PostgreSQL 16 benchmark with 1 million synthetic entries
+measured 30 batches of 128 hits each: renewal median 10.94 ms, p95 16.64 ms;
+recent-hit median 4.66 ms, p95 5.30 ms, including transaction commit. Cache table
+and indexes occupied 249,339,904 bytes. These warm local measurements do not
+predict staging latency or sustained vacuum/I/O cost.
+
+Rollback restores Mainframe image
+`sha-85cf8a1a1de157e85d98070bd292beb3cadbef48@sha256:ab8bf919af3d336031da99fc6d9f365810ca4fd9107501ee1d01b9e78c5aa5a8`
+and `SCAN_CACHE_MAX_ENTRIES=500000`. No rows need deletion. If the lowered limit
+is exceeded, existing valid hits remain usable and new admissions stop until
+expiry cleanup frees capacity. Renewed expiry timestamps persist across rollback.
