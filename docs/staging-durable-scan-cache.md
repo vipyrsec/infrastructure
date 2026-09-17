@@ -282,10 +282,12 @@ inputs (7.9%), with 4,595 validation comparisons and no mismatches. These are
 avoided inputs, not measured percentage speedups. Capacity-skipped admissions
 are attempts, not a count of distinct reusable files.
 
-Validation: Mainframe's full 308-test suite passed with 100% coverage. Regression
+Validation: Mainframe's full 310-test suite passed with 100% coverage. Regression
 tests cover both scanners, hourly write suppression, invalid entries, writer
 contention, quota preservation, short TTL, revocation races, and HTTP commit
-visibility. Repository hooks, strict type checks, and pedantic zizmor pass.
+visibility and rollback-safe renewal accounting. Renewal telemetry increments
+only after transaction commit. Repository hooks, strict type checks, and pedantic
+zizmor pass.
 
 A disposable local PostgreSQL 16 benchmark with 1 million synthetic entries
 measured 30 batches of 128 hits each: renewal median 10.94 ms, p95 16.64 ms;
@@ -298,3 +300,27 @@ Rollback restores Mainframe image
 and `SCAN_CACHE_MAX_ENTRIES=500000`. No rows need deletion. If the lowered limit
 is exceeded, existing valid hits remain usable and new admissions stop until
 expiry cleanup frees capacity. Renewed expiry timestamps persist across rollback.
+
+Mainframe [#430](https://github.com/vipyrsec/dragonfly-mainframe/pull/430) merged
+as `f13dcc95109101a988e2e8fd23280e1e8abce99f` after all CI passed and Greptile
+returned 5/5. The review's pre-commit counter concern was fixed and covered by
+a transaction rollback regression. Infrastructure
+[#201](https://github.com/vipyrsec/infrastructure/pull/201) merged as
+`0d636931ff48e9ec53bbf292fd74370834c42ead` after all CI passed.
+
+Applied the merged staging ConfigMap on 2026-09-17. Only
+`SCAN_CACHE_MAX_ENTRIES` changed, from 500000 to 1000000. The Mainframe rollout
+loads the new environment; worker images and settings are unchanged.
+
+Deployed Mainframe at 22:18 UTC using the published and signed image:
+
+`ghcr.io/vipyrsec/dragonfly-mainframe:sha-f13dcc95109101a988e2e8fd23280e1e8abce99f@sha256:1231d8148c0aebdf7f6fa099ed4395d9d47e263bb403f35bd7d29eceb7623989`
+
+The staging deployment became ready. Both scanners exercised committed cache-hit
+renewal, and new admissions beyond the previous limit confirmed the capacity
+change. Existing namespaces and results were preserved. No new migration ran.
+
+This verifies functionality, not sustained-load performance. Continue comparing
+renewal volume, lookup latency, vacuum activity, avoided inputs, and cache errors.
+Production deployment configuration remained unchanged. No production or scanner
+deployment was made. Detailed runtime evidence remains local to the workspace.
