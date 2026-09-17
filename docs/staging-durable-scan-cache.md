@@ -241,3 +241,20 @@ scan; it did not revoke the namespace or prevent job completion.
 
 Production Mainframe and scanner App deployment/digests/instance counts exactly
 matched their pre-recovery snapshots. No production deployment was performed.
+
+At 01:01:11 UTC after restart, `scc-firewall-manager-sdk 1.22.1514` reused 416 files
+(5,385,421 bytes) and passed four sampled fresh comparisons with zero mismatches
+or cache errors. This exercised the live validation path across process replacement.
+
+Additionally requested temporary YARA `observe` mode at 01:02:40 UTC to compare
+every cached candidate against fresh findings, preserving the same engine/rules
+namespace. Temporary deployment: `d3d5fda7-3d2c-431b-a79c-0260660f3c6f`.
+
+Observe mode completed seven fresh comparisons across four normal jobs at
+01:03:54–01:03:56 UTC, with zero mismatches and zero cache errors. Restored the
+exact pre-observe App spec (YARA mode `reuse`) after that validation. No other
+worker settings or credentials were changed during the temporary check.
+
+Final staging App deployment `3bf6f616-8742-4e75-bfd6-3ee05cfdd9ec` became active at
+01:04:58 UTC. Verified YARA is back in `reuse` mode with the corrected image and
+OpenGrep retains its existing image and reuse configuration.
