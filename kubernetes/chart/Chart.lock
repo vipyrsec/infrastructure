@@ -1,18 +1,18 @@
 dependencies:
 - name: ingress-nginx
   repository: https://kubernetes.github.io/ingress-nginx
-  version: 4.14.3
+  version: 4.15.1
 - name: cert-manager
   repository: https://charts.jetstack.io
-  version: v1.19.4
+  version: v1.21.0
 - name: metrics-server
   repository: https://kubernetes-sigs.github.io/metrics-server
-  version: 3.13.0
+  version: 3.13.1
 - name: alloy
   repository: https://grafana.github.io/helm-charts
-  version: 1.6.0
+  version: 1.11.0
 - name: loki
   repository: https://grafana.github.io/helm-charts
-  version: 6.53.0
-digest: sha256:a4c44b0c6b5a070ab0c16f419769b72fcff71aed6376cb2b9c8c998a14e63a48
-generated: "2026-03-01T22:28:06.271014858Z"
+  version: 7.1.0
+digest: sha256:b67a36a1761181a6531206cc508f2fbb5e01c06e37a9c50d304f0496e1247c22
+generated: "2026-07-24T01:31:11.072470333Z"
