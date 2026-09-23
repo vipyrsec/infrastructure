@@ -1,7 +1,9 @@
-# Staging durable scanner cache
+# Durable scanner cache
 
 This replaces cross-job process memory with optional PostgreSQL-backed results
-for both scanners. Production is excluded. Within-package deduplication remains.
+for both scanners. The September 23 production promotion supersedes the original
+staging-only restriction; historical rollout records below retain their original
+scope. Within-package deduplication remains.
 No package findings or existing scan tables are rewritten or backfilled.
 
 ## Identity and correctness
@@ -63,7 +65,7 @@ Failed, partial, unscanned and package-context-dependent inputs are not admitted
   the renewal interval is half the TTL. Expired, quarantined, and revoked results
   cannot renew. Writer contention skips renewal while returning valid hits;
   database errors retain the normal uncached-scan fallback. Cleanup runs every minute and removes
-  at most 1,000 expired rows per scanner/tick. It never cleans canonical findings.
+  at most 100 expired rows per scanner/tick, using a namespace/expiry index. It never cleans canonical findings.
   Table-specific autovacuum settings encourage reuse of space. Empty unrevoked or
   obsolete-rule namespaces are removed; active-rule
   revocation records remain.

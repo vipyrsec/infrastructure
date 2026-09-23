@@ -1435,7 +1435,7 @@ data:
         {
           "id": 11,
           "type": "row",
-          "title": "Staging scanner reuse experiment",
+          "title": "Scanner reuse experiment",
           "collapsed": false,
           "gridPos": {
             "h": 1,
@@ -1486,8 +1486,8 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "sum by (scanner, mode) (increase(scanner_reuse_reused_files_total{cluster=\"staging\"}[$__range]))",
-              "legendFormat": "{{scanner}} / {{mode}}",
+              "expr": "sum by (cluster,scanner, mode) (increase(scanner_reuse_reused_files_total{cluster=~\"$cluster\"}[$__range]))",
+              "legendFormat": "{{cluster}} / {{scanner}} / {{mode}}",
               "instant": true
             }
           ]
@@ -1533,8 +1533,8 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "sum by (scanner, mode) (increase(scanner_reuse_reused_bytes_total{cluster=\"staging\"}[$__range]))",
-              "legendFormat": "{{scanner}} / {{mode}}",
+              "expr": "sum by (cluster,scanner, mode) (increase(scanner_reuse_reused_bytes_total{cluster=~\"$cluster\"}[$__range]))",
+              "legendFormat": "{{cluster}} / {{scanner}} / {{mode}}",
               "instant": true
             }
           ]
@@ -1580,8 +1580,8 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "sum by (scanner, mode) (increase(scanner_reuse_validated_files_total{cluster=\"staging\"}[$__range]))",
-              "legendFormat": "{{scanner}} / {{mode}}",
+              "expr": "sum by (cluster,scanner, mode) (increase(scanner_reuse_validated_files_total{cluster=~\"$cluster\"}[$__range]))",
+              "legendFormat": "{{cluster}} / {{scanner}} / {{mode}}",
               "instant": true
             }
           ]
@@ -1627,8 +1627,8 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "sum by (scanner, mode) (increase(scanner_reuse_mismatched_files_total{cluster=\"staging\"}[$__range]))",
-              "legendFormat": "{{scanner}} / {{mode}}",
+              "expr": "sum by (cluster,scanner, mode) (increase(scanner_reuse_mismatched_files_total{cluster=~\"$cluster\"}[$__range]))",
+              "legendFormat": "{{cluster}} / {{scanner}} / {{mode}}",
               "instant": true
             }
           ]
@@ -1674,8 +1674,8 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "sum by (scanner, mode) (increase(scanner_reuse_overhead_seconds_total{cluster=\"staging\"}[$__range]))",
-              "legendFormat": "{{scanner}} / {{mode}}",
+              "expr": "sum by (cluster,scanner, mode) (increase(scanner_reuse_overhead_seconds_total{cluster=~\"$cluster\"}[$__range]))",
+              "legendFormat": "{{cluster}} / {{scanner}} / {{mode}}",
               "instant": true
             }
           ]
@@ -1721,8 +1721,8 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "sum by (scanner, mode) (increase(scanner_reuse_engine_seconds_total{cluster=\"staging\"}[$__range]))",
-              "legendFormat": "{{scanner}} / {{mode}}",
+              "expr": "sum by (cluster,scanner, mode) (increase(scanner_reuse_engine_seconds_total{cluster=~\"$cluster\"}[$__range]))",
+              "legendFormat": "{{cluster}} / {{scanner}} / {{mode}}",
               "instant": true
             }
           ]
@@ -1768,8 +1768,8 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "sum by (scanner, mode) (increase(scanner_reuse_reports_total{cluster=\"staging\"}[$__range]))",
-              "legendFormat": "{{scanner}} / {{mode}}",
+              "expr": "sum by (cluster,scanner, mode) (increase(scanner_reuse_reports_total{cluster=~\"$cluster\"}[$__range]))",
+              "legendFormat": "{{cluster}} / {{scanner}} / {{mode}}",
               "instant": true
             }
           ]
@@ -1815,8 +1815,8 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "sum by (scanner, mode) (increase(scanner_reuse_errors_total{cluster=\"staging\"}[$__range]))",
-              "legendFormat": "{{scanner}} / {{mode}}",
+              "expr": "sum by (cluster,scanner, mode) (increase(scanner_reuse_errors_total{cluster=~\"$cluster\"}[$__range]))",
+              "legendFormat": "{{cluster}} / {{scanner}} / {{mode}}",
               "instant": true
             }
           ]
@@ -1856,8 +1856,8 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "100 * sum by (scanner) (rate(scanner_reuse_reused_files_total{cluster=\"staging\",mode=\"reuse\"}[$__rate_interval])) / clamp_min(sum by (scanner) (rate(scanner_reuse_reused_files_total{cluster=\"staging\",mode=\"reuse\"}[$__rate_interval]) + rate(scanner_reuse_engine_files_total{cluster=\"staging\",mode=\"reuse\"}[$__rate_interval])), 1e-9)",
-              "legendFormat": "{{scanner}} / {{mode}}"
+              "expr": "100 * sum by (cluster,scanner) (rate(scanner_reuse_reused_files_total{cluster=~\"$cluster\",mode=\"reuse\"}[$__rate_interval])) / clamp_min(sum by (cluster,scanner) (rate(scanner_reuse_reused_files_total{cluster=~\"$cluster\",mode=\"reuse\"}[$__rate_interval]) + rate(scanner_reuse_engine_files_total{cluster=~\"$cluster\",mode=\"reuse\"}[$__rate_interval])), 1e-9)",
+              "legendFormat": "{{cluster}} / {{scanner}} / {{mode}}"
             }
           ]
         },
@@ -1896,8 +1896,8 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "sum by (scanner, mode) (rate(scanner_reuse_engine_seconds_total{cluster=\"staging\"}[$__rate_interval])) / clamp_min(sum by (scanner, mode) (rate(scanner_reuse_reports_total{cluster=\"staging\"}[$__rate_interval])), 1e-9)",
-              "legendFormat": "{{scanner}} / {{mode}}"
+              "expr": "sum by (cluster,scanner, mode) (rate(scanner_reuse_engine_seconds_total{cluster=~\"$cluster\"}[$__rate_interval])) / clamp_min(sum by (cluster,scanner, mode) (rate(scanner_reuse_reports_total{cluster=~\"$cluster\"}[$__rate_interval])), 1e-9)",
+              "legendFormat": "{{cluster}} / {{scanner}} / {{mode}}"
             }
           ]
         },
@@ -1936,8 +1936,8 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "sum by (scanner, mode) (rate(scanner_reuse_evicted_files_total{cluster=\"staging\"}[$__rate_interval]))",
-              "legendFormat": "{{scanner}} / {{mode}}"
+              "expr": "sum by (cluster,scanner, mode) (rate(scanner_reuse_evicted_files_total{cluster=~\"$cluster\"}[$__rate_interval]))",
+              "legendFormat": "{{cluster}} / {{scanner}} / {{mode}}"
             }
           ]
         },
@@ -1976,15 +1976,15 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "time() - max by (scanner) (scanner_reuse_last_report_timestamp_seconds{cluster=\"staging\",mode=\"reuse\"} > 0)",
-              "legendFormat": "{{scanner}} / {{mode}}"
+              "expr": "time() - max by (cluster,scanner) (scanner_reuse_last_report_timestamp_seconds{cluster=~\"$cluster\",mode=\"reuse\"} > 0)",
+              "legendFormat": "{{cluster}} / {{scanner}} / {{mode}}"
             }
           ]
         },
         {
           "id": 24,
           "type": "row",
-          "title": "Staging database scan cache",
+          "title": "Database scan cache",
           "collapsed": false,
           "gridPos": {
             "x": 0,
@@ -1999,7 +1999,7 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Staging-only durable cache. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
+          "description": "Durable cache for the selected clusters. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
           "fieldConfig": {
             "defaults": {
               "unit": "bytes"
@@ -2032,8 +2032,8 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "max(scanner_cache_storage_bytes{cluster=\"staging\"})",
-              "legendFormat": "{{scanner}} {{operation}} {{outcome}} {{__name__}}"
+              "expr": "max by (cluster)(scanner_cache_storage_bytes{cluster=~\"$cluster\"})",
+              "legendFormat": "{{cluster}} / {{scanner}} {{operation}} {{outcome}} {{__name__}}"
             }
           ],
           "title": "Durable cache storage including indexes",
@@ -2044,7 +2044,7 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Staging-only durable cache. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
+          "description": "Durable cache for the selected clusters. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
           "fieldConfig": {
             "defaults": {
               "unit": "short"
@@ -2077,8 +2077,8 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "sum by(scanner)(scanner_cache_entries{cluster=\"staging\"})",
-              "legendFormat": "{{scanner}} {{operation}} {{outcome}} {{__name__}}"
+              "expr": "sum by (cluster,scanner)(scanner_cache_entries{cluster=~\"$cluster\"})",
+              "legendFormat": "{{cluster}} / {{scanner}} {{operation}} {{outcome}} {{__name__}}"
             }
           ],
           "title": "Durable cache entries by scanner",
@@ -2089,7 +2089,7 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Staging-only durable cache. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
+          "description": "Durable cache for the selected clusters. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
           "fieldConfig": {
             "defaults": {
               "unit": "s"
@@ -2122,8 +2122,8 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "histogram_quantile(0.95, sum by(le,operation)(rate(scanner_cache_request_seconds_bucket{cluster=\"staging\"}[$__rate_interval])))",
-              "legendFormat": "{{scanner}} {{operation}} {{outcome}} {{__name__}}"
+              "expr": "histogram_quantile(0.95, sum by (cluster,le,operation)(rate(scanner_cache_request_seconds_bucket{cluster=~\"$cluster\"}[$__rate_interval])))",
+              "legendFormat": "{{cluster}} / {{scanner}} {{operation}} {{outcome}} {{__name__}}"
             }
           ],
           "title": "Cache operation p95 latency",
@@ -2134,7 +2134,7 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Staging-only durable cache. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
+          "description": "Durable cache for the selected clusters. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
           "fieldConfig": {
             "defaults": {
               "unit": "ops"
@@ -2167,8 +2167,8 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "sum by(operation,outcome)(rate(scanner_cache_requests_total{cluster=\"staging\"}[$__rate_interval]))",
-              "legendFormat": "{{scanner}} {{operation}} {{outcome}} {{__name__}}"
+              "expr": "sum by (cluster,operation,outcome)(rate(scanner_cache_requests_total{cluster=~\"$cluster\"}[$__rate_interval]))",
+              "legendFormat": "{{cluster}} / {{scanner}} {{operation}} {{outcome}} {{__name__}}"
             }
           ],
           "title": "Cache operations and bypasses",
@@ -2179,7 +2179,7 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Staging-only durable cache. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
+          "description": "Durable cache for the selected clusters. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
           "fieldConfig": {
             "defaults": {
               "unit": "short"
@@ -2212,8 +2212,8 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "sum by(__name__,scanner)({__name__=~\"scanner_cache_(rows_inserted|admission_skips)_total\",cluster=\"staging\"})",
-              "legendFormat": "{{scanner}} {{operation}} {{outcome}} {{__name__}}"
+              "expr": "sum by (cluster,__name__,scanner)({__name__=~\"scanner_cache_(rows_inserted|admission_skips)_total\",cluster=~\"$cluster\"})",
+              "legendFormat": "{{cluster}} / {{scanner}} {{operation}} {{outcome}} {{__name__}}"
             }
           ],
           "title": "Durable cache inserts and admission skips",
@@ -2224,7 +2224,7 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Staging-only durable cache. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
+          "description": "Durable cache for the selected clusters. Storage includes indexes; payload excludes tuple/index overhead. Admission skips include duplicates and capacity limits.",
           "fieldConfig": {
             "defaults": {
               "unit": "bytes"
@@ -2257,8 +2257,8 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "sum by(scanner)(scanner_cache_payload_bytes{cluster=\"staging\"})",
-              "legendFormat": "{{scanner}} {{operation}} {{outcome}} {{__name__}}"
+              "expr": "sum by (cluster,scanner)(scanner_cache_payload_bytes{cluster=~\"$cluster\"})",
+              "legendFormat": "{{cluster}} / {{scanner}} {{operation}} {{outcome}} {{__name__}}"
             }
           ],
           "title": "Durable cache result payload by scanner",
