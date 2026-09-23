@@ -175,7 +175,7 @@ For both workers, copy only the staging `DRAGONFLY_REUSE_CACHE_*` settings:
 `MODE=reuse`, `DATABASE=true`, `ENTRIES=4096`, `BYTES=33554432`. Preserve production
 credentials, URLs, instance sizes/counts, single-thread settings and all other
 configuration. The DigitalOcean App spec is prepared from the current production
-spec; complete specs remain outside the repository and are never printed.
+spec; complete specs remain outside the repository. Secret values remain provider-encrypted.
 
 Rollback can disable worker reuse (`DRAGONFLY_REUSE_CACHE_MODE=off`) and API
 caching (`SCAN_CACHE_ENABLED=false`) without deleting cache or canonical data.
@@ -188,3 +188,41 @@ selected. Apply only that dashboard ConfigMap to observability. App-spec schema
 validation passed; the create-oriented remote proposal endpoint cannot validate
 an existing app's encrypted secret references. Production update preserves those
 references unchanged and is validated by the update endpoint itself.
+
+## Production rollout results
+
+Infrastructure [#204](https://github.com/vipyrsec/infrastructure/pull/204) merged
+as `a801cd5e7194faa3e160c1b24e73a295876e4478` after all checks passed. The production
+CA/Alloy fix, cluster-selectable dashboard, and cache ConfigMap were applied.
+The API image and optional cache envFrom reference changed in one deployment;
+existing references were preserved. Mainframe became Ready at 23:12:20 UTC with
+migration `8b2d4e6f901a`, cache enabled, the one-million-row limit, and zero pending
+ingestion retries verified directly. Loader ingestion resumed successfully.
+
+Production App deployment `4bc40afc-807f-4f1e-860a-d806960071d3` was created at
+23:12:50 UTC and became ACTIVE at 23:13:15, with all nine steps successful. A
+structural comparison verified only the two worker image digests and cache
+variables changed; all other settings and encrypted secret references matched.
+The pre-update spec was fetched again and verified unchanged before applying.
+Both environments' managed PostgreSQL scrape metrics now report `up=1`.
+
+Normal production traffic began populating the YARA cache and produced an
+accepted durable hit. One maintenance tick at 23:14:16 skipped on the deliberately
+nonblocking cache semaphore (`Cache busy`), not a database transaction error.
+
+By 23:17 UTC, production had 133 successful cache lookups, 88 writes, five
+successful ingestion batches, and zero API restarts or cache database errors.
+YARA accepted-result telemetry reported 65 reused file inputs across 37 reports;
+OpenGrep had completed two reports and persisted 1,147 entries, with its cache
+still warming and no reused input observed at that checkpoint. Neither scanner
+reported a cache error or validation mismatch. The other logged errors were
+explicit archive/download-size safeguards. No cache rows were old enough to
+expire yet; subsequent maintenance snapshots completed successfully.
+
+The updated 30-panel dashboard was verified inside the running Grafana pod, with
+non-cache panels and other dashboard settings preserved. Staging remained healthy
+at 23:17:54 UTC: 27 accepted batches, 5,400 rows expired, no restarts or cache
+database errors. Archive safeguards and nonblocking admission fallbacks remain
+intentional behavior. Node memory headroom remains limited; the existing
+single-replica, zero-surge strategy caused brief API handover gaps and failed
+loader attempts during deployment. No cluster sizing changes were made.
