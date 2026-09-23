@@ -101,10 +101,10 @@ Socket vetted SHA-256 (`sha2` 0.10.9) and its newly resolved transitive dependen
 The migration upgrades, downgrades and re-upgrades on disposable PostgreSQL;
 a canonical scan sentinel survives downgrade unchanged.
 
-## Staging settings and rollback
+## Cache settings and rollback
 
 Mainframe: `SCAN_CACHE_ENABLED=true`, `SCAN_CACHE_MAX_ENTRIES=1000000` in the
-staging-only ConfigMap. The application default remains 500,000;
+environment-specific ConfigMaps. The application default remains 500,000;
 `SCAN_CACHE_MAX_ENTRIES`, `SCAN_CACHE_MAX_BYTES`, `SCAN_CACHE_MAX_DISK_BYTES`, and
 `SCAN_CACHE_TTL_SECONDS` allow explicit adjustment.
 
