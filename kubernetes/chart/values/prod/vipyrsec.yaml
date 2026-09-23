@@ -173,8 +173,13 @@ alloy:
         }
 
         prometheus.scrape "postgres_do" {
+            scheme     = "https"
             targets    = [{"__address__" = nonsensitive(remote.kubernetes.secret.postgres.data.metrics_url)}]
             forward_to = [prometheus.relabel.tagged.receiver]
+
+            tls_config {
+                ca_pem = nonsensitive(remote.kubernetes.secret.postgres.data.metrics_ca)
+            }
 
             basic_auth {
                 username = nonsensitive(remote.kubernetes.secret.postgres.data.metrics_username)
