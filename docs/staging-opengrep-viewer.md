@@ -19,26 +19,33 @@ both feeds follows successful production rollout; it is not part of this
 staging deployment.
 
 The bot image workflow builds and signs the release. Record its source commit,
-digest, and successful workflow run before deployment. Apply only the staging
-image patch, so environment secrets and unrelated workload configuration remain
-intact.
+digest, and successful workflow run before deployment. Set only the staging
+container image, so environment secrets and unrelated workload configuration
+remain intact.
 
-Release commit: `eb0c9eade5739ea0839a7c14690fa298cc8bef2b`.
-The [image workflow](https://github.com/vipyrsec/bot/actions/runs/36130697499)
+Release commit: `cc8edd7dbe931563ce03266b0d7cd382425dfddf`.
+The [image workflow](https://github.com/vipyrsec/bot/actions/runs/36131433069)
 successfully built, signed, and published digest
-`sha256:fcb2ddb62c26241930f051a5a699eb86f3b1132ff03eb295831b66005258150b`.
+`sha256:7ef0b53c3473853cd7ead48be7198dc76ad01da498bb487e20d58ed37aa44799`.
 
-Confirm the context before applying the environment-specific patch:
+Confirm the context before setting the environment-specific image:
 
 ```bash
 kubectl config get-contexts do-sfo3-staging
-kubectl --context do-sfo3-staging -n discord patch deployment bot \
-  --type=strategic \
-  --patch-file=kubernetes/environments/staging/discord/opengrep-viewer-image-patch.yaml
+kubectl --context do-sfo3-staging -n discord set image deployment/bot \
+  bot=ghcr.io/vipyrsec/bot:sha-cc8edd7dbe931563ce03266b0d7cd382425dfddf@sha256:7ef0b53c3473853cd7ead48be7198dc76ad01da498bb487e20d58ed37aa44799
 kubectl --context do-sfo3-staging -n discord rollout status deployment/bot
 ```
 
 ## Verification
+
+The first candidate (`eb0c9ea`) rolled out at 11:44 UTC but exposed an
+extension-discovery regression. The bot treated the new viewer helper as an
+extension without a `setup` entry point. Staging was restored to the prior image
+and completed startup at 11:45:38 UTC. The helper was moved outside `bot.exts`,
+and the smoke test now checks every extension discovered by the real loader.
+The correction is in bot PR [#346](https://github.com/vipyrsec/bot/pull/346).
+The corrected image must pass startup and publication checks before monitoring.
 
 - Confirm the staging pod runs the expected image and logs a successful startup.
 - Confirm completed OpenGrep results update their originating alerts, retain

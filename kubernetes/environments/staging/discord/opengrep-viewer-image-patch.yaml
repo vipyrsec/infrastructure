@@ -1,8 +1,0 @@
----
-# Strategic merge patch for discord/bot in do-sfo3-staging only.
-spec:
-  template:
-    spec:
-      containers:
-        - name: bot
-          image: ghcr.io/vipyrsec/bot:sha-eb0c9eade5739ea0839a7c14690fa298cc8bef2b@sha256:fcb2ddb62c26241930f051a5a699eb86f3b1132ff03eb295831b66005258150b
